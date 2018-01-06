@@ -1,0 +1,28 @@
+LOGS:
+
+linguistics-
+
+separates sentences into phrases and makes a tree in json at attribute 'result'
+
+analyze-text relies on capitalisations to identify proper nouns. 
+handles exclamations well.
+can't handle non-literal usage eg suppose that.
+has some basic ml
+works for symbols
+
+
+text_analysis
+
+analyses sentiment, key phrases and language from text
+
+sentiment analysis isn't that good, beware of default 0.50 value when sentiment analysis fails
+phrase separation is good
+language analysis identifies only the predominant language
+
+
+Academic Data 
+
+provides wealth of data from scientists names to their papers and journals.
+
+Query syntax must be generated.
+Difficult to test, seems to work fine.
