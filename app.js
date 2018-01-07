@@ -114,11 +114,11 @@ bot.dialog('/exit', [
     },
     function (session,results) {
         //experimental
-        session.userData.exitBool = results.response;//does it return yes no ?
+        session.userData.exitBool = results.response.text;//does it return yes no ?
         // session.sendTyping();
         
         //check syntax
-        if(session.userData.exitBool == true){
+        if (session.userData.exitBool.toUpperCase() == 'YES'){
             session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
             session.send(FeedbackFormUrl);
             session.endConversation();
@@ -159,7 +159,7 @@ bot.dialog('/main', [
         
         session.conversationData.mainEntry = session.message.text ;  //starting para of the user
 
-        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|Help", { listStyle : builder.ListStyle.auto});
+        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|Help|Exit", { listStyle : builder.ListStyle.auto});
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
@@ -175,11 +175,19 @@ bot.dialog('/main', [
             //     session.endDialog("Thanks for using. You can chat again by saying Hi");
             // }
             // else {
+            
+            //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
+
+            //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
+            
+            
             switch (results.response.entity) {
                 case "Proper Noun\n<Entities>":
                     // session.beginDialog('/events');
                     //call a JS in the source here
                     session.send("Proper Noun case detected");
+                    //call the proper noun dialogue with session.begin
+                    // session.beginDialog('/properNoun');//With what data ?
                     break;
                 case "Current info\n<News>":
                     //call a JS in the source here
@@ -187,20 +195,26 @@ bot.dialog('/main', [
                     break;
                 case "People also search for\n<Recommendations/Similar>":
                     //call a JS in the source here
+                    session.send("People also search for case detected");
                     break;
                 case "Scientific Domain\n<Academica>":
                     //call a JS in the source here
+                    session.send("Scientific domain case detected");
                     break;
                 case "Term-Defination\n<Meaning>":
                     //call a JS in the source here//and the displayer
+                    session.send("Term defination case detected");
                     break;
                 case "Help":
-                    //call a JS in the source here
+                    //do i want the help dialogue to return here ?
                     session.beginDialog("/help")
                     break;
                 case "Exit":
                     session.replaceDialog('/exit');
                     break;
+                default:
+                    session.replaceDialog('/more')
+                //PUSH IT INTO A GENERIC SEARCH OR MORE CASE 
             }
             // }
         }
@@ -217,7 +231,7 @@ bot.dialog('/main', [
         // session.conversationData.moreBool = results.response;
         
         //CHECK SYNTAX BELOW
-        if(results.response == true ){
+        if (results.response.text.toUpperCase() == 'YES' ){
             session.replaceDialog('/more');
         }
         session.endDialog();
@@ -227,14 +241,25 @@ bot.dialog('/main', [
 bot.dialog('/more',[
     function(session,args,next){
         //session.conversationData.mainEntry will contain the original text, meanwhile we can store the keywords
-        //call some common search engine dictionary
+        session.send('Here are some more links to satisfy your curosity:');
     },
     function(session,results){
+        //call some common search engine dictionary from src js folder
         
         session.endDialog();
     }
 ])
 
+//below dialogue calls the JS and prettifies the output
+bot.dialog('/properNoun',[
+    function (session, args, next) {
+        //call some API in the src directory with the conversation data you have
+    },
+    function (session, results) {
+
+        session.endDialog();
+    }
+])
 
 // bot.dialog('/none', [
 //     function (session) {
