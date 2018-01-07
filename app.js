@@ -66,11 +66,11 @@ var surveyFormUrl = process.env.FormURL;
 bot.dialog('/', intents);   
 intents.matches('Greeting', '/greeting');
 intents.matches('Help', '/help');
-intents.matches('Main', '/main');
+// intents.matches('Main', '/main');
 intents.matches('Exit', '/exit');
 intents.matches('More', '/more');//difficult ?
 // intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
-
+intents.matches('None', '/main')
 // different than campus bot
 intents.onDefault((session) => {//for NONE
     // DO SOMETHING RANDOM HERE ----------------------------------------LIKE THOUGHTFUL THINGS OR QUOTES ETC ---------------------  
