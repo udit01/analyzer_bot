@@ -67,7 +67,7 @@ bot.dialog('/', intents);
 intents.matches('Greeting', '/greeting');
 intents.matches('Help', '/help');
 intents.matches('Exit', '/exit');
-intents.matches('More', '/more');//difficult ?
+// intents.matches('More', '/more');//difficult ?
 intents.matches('None', '/main')
 // intents.matches('Main', '/main');
 // intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
@@ -120,7 +120,7 @@ bot.dialog('/exit', [
         //check syntax
         if (session.userData.exitBool.toUpperCase() == 'YES'){
             session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
-            session.send(FeedbackFormUrl);
+            session.send(""+FeedbackFormUrl);
             session.endConversation();
         }
         else{
