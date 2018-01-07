@@ -43,7 +43,7 @@ var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
 //CUSTOM ENV VARIABLES:
-var surveyFormUrl = process.env.FormURL;
+var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -66,15 +66,15 @@ var surveyFormUrl = process.env.FormURL;
 bot.dialog('/', intents);   
 intents.matches('Greeting', '/greeting');
 intents.matches('Help', '/help');
-intents.matches('Main', '/main');
 intents.matches('Exit', '/exit');
 intents.matches('More', '/more');//difficult ?
+intents.matches('None', '/main')
+// intents.matches('Main', '/main');
 // intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
 
-// different than campus bot
 intents.onDefault((session) => {//for NONE
     // DO SOMETHING RANDOM HERE ----------------------------------------LIKE THOUGHTFUL THINGS OR QUOTES ETC ---------------------  
-    session.send('This is the default intent \'%s\'.', session.message.text);
+    session.send('This is the default intent and it repeates your message: \'%s\'.', session.message.text);
 });
 
 
@@ -82,61 +82,53 @@ var introMessage = ['I help to find relevant information both current and all-ti
     'Deveoped by :-\n Udit Jain, Soumya Sharma, Akshat Khare.'
 ];
 
+var helpMessage = ['This message will contain the usage information how to use.\n Next Line',
+    'Another Message.'
+];
+
 
 bot.dialog('/greeting', [
     // function (session, args, next) {
     //      builder.Prompts.text(session, 'Hello there! I am analyzer bot ');
     // },
-    function (session, results) {
-        session.send('Hello there! I am analyzer bot and  ');
-        // session.replaceDialog('/main');
-        session.endDialog();
+    function (session, args,next) {
+        // session.send('Hello there! I am analyzer bot and send the para you want to analyze');
+        session.Prompts.text(session, 'Hello there! I am analyzer bot and text the para you want to analyze.')
+    
+    },
+    function(session,results){
+
+        session.conversationData.greetingPrompt = results.response;
+        
+        // i dont want to come back
+        session.replaceDialog('/main');
     }
 ]);
 
 
 
 bot.dialog('/exit', [
-    function (session, results) {
-        session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
-        session.send(surveyFormUrl);
-        session.endConversation();
-    }
-]);
-
-bot.dialog('/main', [
     function (session, args, next) {
-        //check for the user-data completeness here
-        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>| Current info\n<News>|People also search for\n<Recommendations>|Scientific Papers\n<Academica>| Term-Defination | Help");
+        //add would you really like to delete conversational data ?
+        builder.Prompts.confirm(session, "Are you sure you wish to delete this conversation's context?");
+    },
+    function (session,results) {
+        //experimental
+        session.userData.exitBool = results.response.text;//does it return yes no ?
+        // session.sendTyping();
         
-        // idk why the below function call is required
-        // next();
-    },
-    function (session, args, next) {
+        //check syntax
+        if (session.userData.exitBool.toUpperCase() == 'YES'){
+            session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
+            session.send(FeedbackFormUrl);
+            session.endConversation();
+        }
+        else{
+            //i want to start a new dialogue not come back
+            session.replaceDialog('/greeting');
+        }
         
     },
-    function (session, results) {
-        if (results.response) {
-            
-            session.send(results.response.entity);
-            
-            if (results.response.entity === 'Exit') {
-                
-                session.endDialog("You can chat again by saying Hi");
-            }
-            else {
-                session.send('Hey! you are in the main intent! function 3');                
-            }
-        }
-        else {
-            session.endDialog("Invalid Response. You can call again by saying Hi");
-        }
-    },
-    function (session, results) {
-        // The menu runs a loop until the user chooses to (quit).
-        // session.replaceDialog('/main');
-        session.endDialog();
-    }
 ]);
 
 bot.dialog('/help', [
@@ -152,10 +144,122 @@ bot.dialog('/help', [
         introMessage.forEach(function (ms) {
             session.send(ms);
         });
+
+        helpMessage.forEach(function (ms) {
+            session.send(ms);
+        });
         session.endDialog();
     }
 ]);
 
+bot.dialog('/main', [
+    function (session, args, next) {
+        //check for the user-data completeness here
+        // save the data sent by user to jump to this intent somewhere!
+        
+        session.conversationData.mainEntry = session.message.text ;  //starting para of the user
+
+        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|Help|Exit", { listStyle : builder.ListStyle.auto});
+        //experimental
+        // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
+    },
+    function (session, args, next) {
+        //experimental
+        session.sendTyping();
+        // term = args;
+        // session.send(bing_web_search(term));
+        
+        if (results.response) {
+            // var intents_in_resp = results.response.intents;
+            // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
+            //     session.endDialog("Thanks for using. You can chat again by saying Hi");
+            // }
+            // else {
+            
+            //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
+
+            //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
+            
+            
+            switch (results.response.entity) {
+                case "Proper Noun\n<Entities>":
+                    // session.beginDialog('/events');
+                    //call a JS in the source here
+                    session.send("Proper Noun case detected");
+                    //call the proper noun dialogue with session.begin
+                    // session.beginDialog('/properNoun');//With what data ?
+                    break;
+                case "Current info\n<News>":
+                    //call a JS in the source here
+                    session.send("Current info case detected");                    
+                    break;
+                case "People also search for\n<Recommendations/Similar>":
+                    //call a JS in the source here
+                    session.send("People also search for case detected");
+                    break;
+                case "Scientific Domain\n<Academica>":
+                    //call a JS in the source here
+                    session.send("Scientific domain case detected");
+                    break;
+                case "Term-Defination\n<Meaning>":
+                    //call a JS in the source here//and the displayer
+                    session.send("Term defination case detected");
+                    break;
+                case "Help":
+                    //do i want the help dialogue to return here ?
+                    session.beginDialog("/help")
+                    break;
+                case "Exit":
+                    session.replaceDialog('/exit');
+                    break;
+                default:
+                    session.replaceDialog('/more')
+                //PUSH IT INTO A GENERIC SEARCH OR MORE CASE 
+            }
+            // }
+        }
+        else {
+            session.endDialog("Invalid Response. You can start again by texting the paragraph you want to analyze");
+        }
+    },
+    function (session, args,next) {
+        // The menu runs a loop until the user chooses to (quit).
+        session.Prompts.confirm("Do you want some more external links to the common search enginers ? ")
+    },
+    function (session, results) {
+        // The menu runs a loop until the user chooses to (quit).
+        // session.conversationData.moreBool = results.response;
+        
+        //CHECK SYNTAX BELOW
+        if (results.response.text.toUpperCase() == 'YES' ){
+            session.replaceDialog('/more');
+        }
+        session.endDialog();
+    }    
+]);
+
+bot.dialog('/more',[
+    function(session,args,next){
+        //session.conversationData.mainEntry will contain the original text, meanwhile we can store the keywords
+        session.send('Here are some more links to satisfy your curosity:');
+    },
+    function(session,results){
+        //call some common search engine dictionary from src js folder
+        
+        session.endDialog();
+    }
+])
+
+//below dialogue calls the JS and prettifies the output
+bot.dialog('/properNoun',[
+    function (session, args, next) {
+        //call some API in the src directory with the conversation data you have
+    },
+    function (session, results) {
+
+        session.endDialog();
+    }
+])
 
 // bot.dialog('/none', [
 //     function (session) {
