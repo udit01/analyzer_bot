@@ -1,13 +1,6 @@
-/*-----------------------------------------------------------------------------
-A simple echo bot for the Microsoft Bot Framework. 
------------------------------------------------------------------------------*/
-
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
-
-
-
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -43,13 +36,14 @@ bot.set('storage', tableStorage);
 var luisAppId = process.env.LuisAppId;
 var luisAPIKey = process.env.LuisAPIKey;
 var luisAPIHostName = process.env.LuisAPIHostName || 'westus.api.cognitive.microsoft.com';
-
 const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v1/application?id=' + luisAppId + '&subscription-key=' + luisAPIKey;
 
 // Main dialog with LUIS
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
+//CUSTOM ENV VARIABLES:
+var surveyFormUrl = process.env.FormURL;
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -70,64 +64,55 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
 
 bot.dialog('/', intents);   
-// intents.matches('main', '/main');
-// intents.matches('intro', '/intro');
-intents.matches('Help', '/help');
 intents.matches('Greeting', '/greeting');
-intents.matches('Cancel', '/cancel');
-intents.matches('Repeat', '/repeat');
-// intents.matches('None', '/none');
+intents.matches('Help', '/help');
+intents.matches('Main', '/main');
+intents.matches('Exit', '/exit');
+intents.matches('More', '/more');//difficult ?
+// intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
 
 // different than campus bot
-intents.onDefault((session) => {
-
-    session.send(intents);
-    
+intents.onDefault((session) => {//for NONE
+    // DO SOMETHING RANDOM HERE ----------------------------------------LIKE THOUGHTFUL THINGS OR QUOTES ETC ---------------------  
     session.send('This is the default intent \'%s\'.', session.message.text);
 });
 
 
-var introMessage = ['This is the intro message has a binary string collection',
-    'Used in \help',
-    'Write here the functionalites of our bot',
-    'Like generic and specific search etc'
+var introMessage = ['I help to find relevant information both current and all-time\n Get results Relevant to academica, general definations and more ',
+    'Deveoped by :-\n Udit Jain, Soumya Sharma, Akshat Khare.'
 ];
 
 
-
-// Custom JS -----------------------------------------
-var e2d = require('./src/entity2dict');
-
-
-// Custom functions -----------------------------------------
-function findAllFromName(entityName) {
-    var dict = []
-
-    try {
-        dict = builder.EntityRecognizer.findAllEntities(args.entities, entityName);
+bot.dialog('/greeting', [
+    // function (session, args, next) {
+    //      builder.Prompts.text(session, 'Hello there! I am analyzer bot ');
+    // },
+    function (session, results) {
+        session.send('Hello there! I am analyzer bot and  ');
+        // session.replaceDialog('/main');
+        session.endDialog();
     }
-    catch (e) {
-        dict = [];
+]);
+
+
+
+bot.dialog('/exit', [
+    function (session, results) {
+        session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
+        session.send(surveyFormUrl);
+        session.endConversation();
     }
-    // if ((dict != null) || (dict) || (dict.length != 0)) {
-
-    // }
-    return dict;
-}
-
-
-
+]);
 
 bot.dialog('/main', [
     function (session, args, next) {
         //check for the user-data completeness here
+        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>| Current info\n<News>|People also search for\n<Recommendations>|Scientific Papers\n<Academica>| Term-Defination | Help");
         
         // idk why the below function call is required
-        next();
+        // next();
     },
     function (session, args, next) {
-        //think on the line
-        builder.Prompts.text(session, 'This is the prompt in main inent in function 2');
         
     },
     function (session, results) {
@@ -170,17 +155,7 @@ bot.dialog('/help', [
         session.endDialog();
     }
 ]);
-bot.dialog('/cancel', [
-    function (session , args , next) {
-        builder.Prompts.text(session,'You are in cancel intent and I am prompting you');
-    },
-    function (session , results){
-        session.send('After this message the stack will be reset by session.replaceDialogue(main)');
-        // session.replaceDialog('/main');
-        session.clearDialogStack();
-        session.endDialog();
-    }
-]);
+
 
 // bot.dialog('/none', [
 //     function (session) {
@@ -189,54 +164,78 @@ bot.dialog('/cancel', [
 //     }
 // ]);
 
-bot.dialog('/greeting', [
-    function (session, args, next) {
-        builder.Prompts.text(session, 'You are in greeting intent and I am prompting you from 1st function');
-    },
-    function (session, results) {
-        session.send('After this message the stack will be reset by session.replaceDialogue(main)');
-        // session.replaceDialog('/main');
-        session.endDialog();
-    }
-]);
+// bot.dialog('/repeat', [
+//     function (session, args, next) {
+        
+//         var text_dict = findAllFromName(args.entities,'repeat-text');
 
-bot.dialog('/repeat', [
-    function (session, args, next) {
-        builder.Prompts.text(session, 'You are in repeat intent (probably again) and I am prompting you to say something so that i will repeat it');
+//         // console.log("----------------------Line 205 " + args);
+       
+//         //want to test this but too dificult ?
+//         // console.log("------------------------------LINE 207 " + ((cancel_dict != null) || (cancel_dict) || (cancel_dict.length != 0)) )
+     
         
-        var cancel_dict = e2d.findAllFromName('Cancel');
-        //want to test this but too dificult ?
-        if ((cancel_dict != null) || (cancel_dict) || (cancel_dict.length != 0) ){
-            session.replaceDialog('/cancel');
-        }
+//         // try{
+//         //     text_dict = builder.EntityRecognizer.findAllEntities(args.entities,'repeat-text');
+//         // }
+//         // catch(e){
+//         //     text_dict = [];
+//         // }
         
-        var text_dict = e2d.findAllFromName('repeat-text');
-        // try{
-        //     text_dict = builder.EntityRecognizer.findAllEntities(args.entities,'repeat-text');
-        // }
-        // catch(e){
-        //     text_dict = [];
-        // }
+//         // if ((text_dict != null) || (text_dict) || (text_dict.length != 0)) {
+//         //     session.replaceDialog('/repeat');
+//         // }
+//         console.log("----------------------Line : 223 " + text_dict[0] + "and dict lenght = " + text_dict.length );
+//         var text_to_repeat = "";
         
-        if ((text_dict != null) || (text_dict) || (text_dict.length != 0)) {
-            session.replaceDialog('/repeat');
-        }
-        
-        var text_to_repeat = "";
-        
-        for (var i = 0; i <  text_dict.length - 1 ; i++){
-            text_to_repeat += text_dict[i] + " " ;     
-        }
-        text_to_repeat += text_dict[ text_dict.length - 1] ;
+//         for (var i = 0; i <  text_dict.length - 1 ; i++){
+//             text_to_repeat += text_dict[i].entity + " " ;     
+//         }
+//         if(text_dict.length!=0){
+//             text_to_repeat += text_dict[text_dict.length - 1].entity ;
+//         }
 
-        next({ response : text_to_repeat  });
-    },
-    function (session, results) {        
+//         console.log("----------------------Line : 231 " + text_to_repeat);
+
+
+//         next({ ttr : text_to_repeat  });
+//     },
+//     function (session, results) {        
         
         
-        session.send('I think you said this :'+ text_to_repeat);
-        session.send('Now sending you to main intent');
-        session.replaceDialog('/main');
-        session.endDialog();
-    }
-]);
+//         session.send('I think you said this :'+ results.ttr);
+
+//         builder.Prompts.text(session, 'You are in repeat intent (probably again) and I am prompting you to say something to cancel or go again');
+//         var cancel_dict = findAllFromName(results.entities,'Exit');
+//         console.log("----------------------Line : 241 " + cancel_dict);
+        
+//         if ( (cancel_dict!=undefined) || (cancel_dict != null) ||  (cancel_dict.length != 0) ){
+//             session.replaceDialog('/cancel');
+//         }
+//         // session.send('Now sending you to main intent');
+//         // session.replaceDialog('/main');
+//         session.endDialog();
+//     }
+// ]);
+
+
+// Custom JS -----------------------------------------
+// var e2d = require('./src/entity2dict');
+
+
+// Custom functions -----------------------------------------
+// function findAllFromName(entities,entityName) {
+//     var arr = []
+
+//     try {
+//         arr = builder.EntityRecognizer.findAllEntities(entities, entityName);
+//     }
+//     catch (e) {
+//         arr = [];
+//     }
+//     // if ((arr != null) || (arr) || (arr.length != 0)) {
+
+//     // }
+//     // console.log("----------------------Line : 113 " + arr[0].entity);
+//     return arr;
+// }
