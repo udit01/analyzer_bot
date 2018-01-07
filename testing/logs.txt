@@ -22,7 +22,32 @@ language analysis identifies only the predominant language
 
 Academic Data 
 
-provides wealth of data from scientists names to their papers and journals.
+Query syntax can be generated from keyword query by using interpret method or by following query syntax
+This query can be sent to the evaluate method which returns suitable results.
+Similarity scores can be checked between two scientific sentences.
 
-Query syntax must be generated.
-Difficult to test, seems to work fine.
+functionality works fine. Can be used for finding research papers, journals, authors from keywords; compare 
+work or sentences scientifically, write own queries for flexibility
+can't handle misspelling of scientists or technical terms.
+
+
+Decisions API
+
+Provides ranking of links according to previous history of user
+
+works only with RSS or Atom feeds, so perhaps useless for us.
+
+
+Entity Recognition
+
+Provides selection of phrases which represent entities.
+
+Relies on capitalisation and structure of words. Can tolerate slight misspelling, if 
+result is still a proper word. Matches unrelated terms as well if capitalised or otherwise highlighted.
+can handle reference text nicely.
+
+
+
+
+
+
