@@ -50,6 +50,7 @@ const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v1/application?id=' +
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
+
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
 // })
@@ -66,18 +67,23 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 //     session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 // });
 
+
+
 bot.dialog('/', intents);   
-intents.matches('main', '/main');
+// intents.matches('main', '/main');
 // intents.matches('intro', '/intro');
 intents.matches('Help', '/help');
 intents.matches('Greeting', '/greeting');
 intents.matches('Cancel', '/cancel');
-intents.matches('None', '/none');
-intents.matches('repeat', '/repeat');
+intents.matches('Repeat', '/repeat');
+// intents.matches('None', '/none');
 
 // different than campus bot
 intents.onDefault((session) => {
-    session.send('Sorry, I did not understand \'%s\'.', session.message.text);
+
+    session.send(intents);
+    
+    session.send('This is the default intent \'%s\'.', session.message.text);
 });
 
 
@@ -126,7 +132,11 @@ bot.dialog('/main', [
     },
     function (session, results) {
         if (results.response) {
+            
+            session.send(results.response.entity);
+            
             if (results.response.entity === 'Exit') {
+                
                 session.endDialog("You can chat again by saying Hi");
             }
             else {
@@ -139,7 +149,8 @@ bot.dialog('/main', [
     },
     function (session, results) {
         // The menu runs a loop until the user chooses to (quit).
-        session.replaceDialog('/main');
+        // session.replaceDialog('/main');
+        session.endDialog();
     }
 ]);
 
@@ -165,16 +176,18 @@ bot.dialog('/cancel', [
     },
     function (session , results){
         session.send('After this message the stack will be reset by session.replaceDialogue(main)');
-        session.replaceDialog('/main');
-    }
-]);
-
-bot.dialog('/none', [
-    function (session) {
-        session.send('You are in None intent and after this, session.endDialogue will be called.');
+        // session.replaceDialog('/main');
+        session.clearDialogStack();
         session.endDialog();
     }
 ]);
+
+// bot.dialog('/none', [
+//     function (session) {
+//         session.send('You are in None intent and after this, session.endDialogue will be called.');
+//         session.endDialog();
+//     }
+// ]);
 
 bot.dialog('/greeting', [
     function (session, args, next) {
@@ -182,7 +195,8 @@ bot.dialog('/greeting', [
     },
     function (session, results) {
         session.send('After this message the stack will be reset by session.replaceDialogue(main)');
-        session.replaceDialog('/main');
+        // session.replaceDialog('/main');
+        session.endDialog();
     }
 ]);
 
@@ -191,7 +205,7 @@ bot.dialog('/repeat', [
         builder.Prompts.text(session, 'You are in repeat intent (probably again) and I am prompting you to say something so that i will repeat it');
         
         var cancel_dict = e2d.findAllFromName('Cancel');
-        
+        //want to test this but too dificult ?
         if ((cancel_dict != null) || (cancel_dict) || (cancel_dict.length != 0) ){
             session.replaceDialog('/cancel');
         }
@@ -223,5 +237,6 @@ bot.dialog('/repeat', [
         session.send('I think you said this :'+ text_to_repeat);
         session.send('Now sending you to main intent');
         session.replaceDialog('/main');
+        session.endDialog();
     }
 ]);

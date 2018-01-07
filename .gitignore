@@ -1,5 +1,5 @@
 ignore/
-
+envVar/
 
 node_modules/
 *.js.map
