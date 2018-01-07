@@ -118,7 +118,7 @@ bot.dialog('/main', [
     },
     function (session, args, next) {
         //think on the line
-        builder.Prompts.text(session, 'This is the prompt in main inent');
+        builder.Prompts.text(session, 'This is the prompt in main inent in function 2');
     },
     function (session, results) {
         if (results.response) {
@@ -126,7 +126,7 @@ bot.dialog('/main', [
                 session.endDialog("You can chat again by saying Hi");
             }
             else {
-                session.send('Hey! you are in the main intent!');                
+                session.send('Hey! you are in the main intent! function 3');                
             }
         }
         else {
@@ -160,7 +160,7 @@ bot.dialog('/cancel', [
         builder.Prompts.text(session,'You are in cancel intent and I am prompting you');
     },
     function (session , results){
-        session.send('After this message the stack will be reset by session.replaceDialogue()');
+        session.send('After this message the stack will be reset by session.replaceDialogue(main)');
         session.replaceDialog('/main');
     }
 ]);
@@ -168,6 +168,16 @@ bot.dialog('/cancel', [
 bot.dialog('/none', [
     function (session) {
         session.send('You are in None intent and after this, session.endDialogue will be called.');
+    }
+]);
+
+bot.dialog('/greeting', [
+    function (session, args, next) {
+        builder.Prompts.text(session, 'You are in greeting intent and I am prompting you from 1st function');
+    },
+    function (session, results) {
+        session.send('After this message the stack will be reset by session.replaceDialogue(main)');
+        session.replaceDialog('/main');
     }
 ]);
 
@@ -210,5 +220,3 @@ bot.dialog('/repeat', [
         session.replaceDialog('/main');
     }
 ]);
-
-
