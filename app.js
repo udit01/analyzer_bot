@@ -80,9 +80,7 @@ intents.matches('Repeat', '/repeat');
 
 // different than campus bot
 intents.onDefault((session) => {
-
-    session.send(intents);
-    
+    console.log("LINE83");    
     session.send('This is the default intent \'%s\'.', session.message.text);
 });
 
