@@ -6,6 +6,9 @@ var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
 
+
+
+
 // Setup Restify Server
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
@@ -84,6 +87,31 @@ var introMessage = ['This is the intro message has a binary string collection',
     'Like generic and specific search etc'
 ];
 
+
+
+// Custom JS -----------------------------------------
+var e2d = require('./src/entity2dict');
+
+
+// Custom functions -----------------------------------------
+function findAllFromName(entityName) {
+    var dict = []
+
+    try {
+        dict = builder.EntityRecognizer.findAllEntities(args.entities, entityName);
+    }
+    catch (e) {
+        dict = [];
+    }
+    // if ((dict != null) || (dict) || (dict.length != 0)) {
+
+    // }
+    return dict;
+}
+
+
+
+
 bot.dialog('/main', [
     function (session, args, next) {
         //check for the user-data completeness here
@@ -127,3 +155,60 @@ bot.dialog('/help', [
         session.endDialog();
     }
 ]);
+bot.dialog('/cancel', [
+    function (session , args , next) {
+        builder.Prompts.text(session,'You are in cancel intent and I am prompting you');
+    },
+    function (session , results){
+        session.send('After this message the stack will be reset by session.replaceDialogue()');
+        session.replaceDialog('/main');
+    }
+]);
+
+bot.dialog('/none', [
+    function (session) {
+        session.send('You are in None intent and after this, session.endDialogue will be called.');
+    }
+]);
+
+bot.dialog('/repeat', [
+    function (session, args, next) {
+        builder.Prompts.text(session, 'You are in repeat intent (probably again) and I am prompting you to say something so that i will repeat it');
+        
+        var cancel_dict = e2d.findAllFromName('Cancel');
+        
+        if ((cancel_dict != null) || (cancel_dict) || (cancel_dict.length != 0) ){
+            session.replaceDialog('/cancel');
+        }
+        
+        var text_dict = e2d.findAllFromName('repeat-text');
+        // try{
+        //     text_dict = builder.EntityRecognizer.findAllEntities(args.entities,'repeat-text');
+        // }
+        // catch(e){
+        //     text_dict = [];
+        // }
+        
+        if ((text_dict != null) || (text_dict) || (text_dict.length != 0)) {
+            session.replaceDialog('/repeat');
+        }
+        
+        var text_to_repeat = "";
+        
+        for (var i = 0; i <  text_dict.length - 1 ; i++){
+            text_to_repeat += text_dict[i] + " " ;     
+        }
+        text_to_repeat += text_dict[ text_dict.length - 1] ;
+
+        next({ response : text_to_repeat  });
+    },
+    function (session, results) {        
+        
+        
+        session.send('I think you said this :'+ text_to_repeat);
+        session.send('Now sending you to main intent');
+        session.replaceDialog('/main');
+    }
+]);
+
+
