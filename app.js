@@ -168,6 +168,7 @@ bot.dialog('/cancel', [
 bot.dialog('/none', [
     function (session) {
         session.send('You are in None intent and after this, session.endDialogue will be called.');
+        session.endDialog();
     }
 ]);
 
