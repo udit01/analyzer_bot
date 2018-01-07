@@ -144,6 +144,10 @@ var introMessage = ['I help to find relevant information both current and all-ti
     'Deveoped by :-\n Udit Jain, Soumya Sharma, Akshat Khare.'
 ];
 
+var helpMessage = ['This message will contain the usage information how to use.\n Next Line',
+    'Another Message.'
+];
+
 
 bot.dialog('/greeting', [
     // function (session, args, next) {
@@ -160,21 +164,49 @@ bot.dialog('/greeting', [
 
 bot.dialog('/exit', [
     function (session, results) {
+        //add would you really like to delete conversational data ?
         session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
         session.send(surveyFormUrl);
         session.endConversation();
     }
 ]);
 
+bot.dialog('/help', [
+    function (session) {
+        var introCard = new builder.HeroCard(session)
+            .title("Analyzer Bot")
+            .text("Increasing your productivity")
+            .images([
+                builder.CardImage.create(session, "https://blog.growthexp.com/wp-content/uploads/2017/08/Analytics.jpg")
+            ]);
+        var msg = new builder.Message(session).attachments([introCard]);
+        session.send(msg);
+        introMessage.forEach(function (ms) {
+            session.send(ms);
+        });
+
+        helpMessage.forEach(function (ms) {
+            session.send(ms);
+        });
+        session.endDialog();
+    }
+]);
+
 bot.dialog('/main', [
     function (session, args, next) {
         //check for the user-data completeness here
+        // save the data sent by user to jump to this intent somewhere!
+        
+        // session.conversationData.start = 
+
         builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>| Current info\n<News>|People also search for\n<Recommendations>|Scientific Papers\n<Academica>| Term-Defination | Help");
         
         // idk why the below function call is required
         // next();
     },
     function (session, args, next) {
+        //experimental
+        session.sendTyping();
         term = args;
 		session.send(bing_web_search(term));
     },
@@ -202,22 +234,7 @@ bot.dialog('/main', [
     }
 ]);
 
-bot.dialog('/help', [
-    function (session) {
-        var introCard = new builder.HeroCard(session)
-            .title("Analyzer Bot")
-            .text("Increasing your productivity")
-            .images([
-                builder.CardImage.create(session, "https://blog.growthexp.com/wp-content/uploads/2017/08/Analytics.jpg")
-            ]);
-        var msg = new builder.Message(session).attachments([introCard]);
-        session.send(msg);
-        introMessage.forEach(function (ms) {
-            session.send(ms);
-        });
-        session.endDialog();
-    }
-]);
+
 
 
 // bot.dialog('/none', [
