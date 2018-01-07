@@ -66,17 +66,21 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 //     session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 // });
 
+
+
 bot.dialog('/', intents);   
 // intents.matches('main', '/main');
 // intents.matches('intro', '/intro');
 intents.matches('Help', '/help');
 intents.matches('Greeting', '/greeting');
 intents.matches('Cancel', '/cancel');
-intents.matches('repeat', '/repeat');
+intents.matches('Repeat', '/repeat');
 // intents.matches('None', '/none');
 
 // different than campus bot
 intents.onDefault((session) => {
+    session.send(intents);
+    
     session.send('This is the default intent \'%s\'.', session.message.text);
 });
 
