@@ -72,8 +72,8 @@ bot.dialog('/', intents);
 intents.matches('Help', '/help');
 intents.matches('Greeting', '/greeting');
 intents.matches('Cancel', '/cancel');
-intents.matches('None', '/none');
 intents.matches('repeat', '/repeat');
+// intents.matches('None', '/none');
 
 // different than campus bot
 intents.onDefault((session) => {
@@ -171,16 +171,17 @@ bot.dialog('/cancel', [
     function (session , results){
         session.send('After this message the stack will be reset by session.replaceDialogue(main)');
         // session.replaceDialog('/main');
+        session.clearDialogStack();
         session.endDialog();
     }
 ]);
 
-bot.dialog('/none', [
-    function (session) {
-        session.send('You are in None intent and after this, session.endDialogue will be called.');
-        session.endDialog();
-    }
-]);
+// bot.dialog('/none', [
+//     function (session) {
+//         session.send('You are in None intent and after this, session.endDialogue will be called.');
+//         session.endDialog();
+//     }
+// ]);
 
 bot.dialog('/greeting', [
     function (session, args, next) {
@@ -230,5 +231,6 @@ bot.dialog('/repeat', [
         session.send('I think you said this :'+ text_to_repeat);
         session.send('Now sending you to main intent');
         session.replaceDialog('/main');
+        session.endDialog();
     }
 ]);
