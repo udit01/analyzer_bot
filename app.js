@@ -91,11 +91,15 @@ bot.dialog('/greeting', [
     // function (session, args, next) {
     //      builder.Prompts.text(session, 'Hello there! I am analyzer bot ');
     // },
-    function (session, results) {
-        session.send('Hello there! I am analyzer bot and send the para you want to analyze');
-        session.Prompts
-        // session.endDialog();
+    function (session, args,next) {
+        // session.send('Hello there! I am analyzer bot and send the para you want to analyze');
+        session.Prompts.text(session, 'Hello there! I am analyzer bot and text the para you want to analyze.')
+    
+    },
+    function(session,results){
 
+        session.conversationData.greetingPrompt = results.response;
+        
         // i dont want to come back
         session.replaceDialog('/main');
     }
@@ -112,6 +116,8 @@ bot.dialog('/exit', [
         //experimental
         session.userData.exitBool = results.response;//does it return yes no ?
         // session.sendTyping();
+        
+        //check syntax
         if(session.userData.exitBool == true){
             session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
             session.send(FeedbackFormUrl);
@@ -151,7 +157,7 @@ bot.dialog('/main', [
         //check for the user-data completeness here
         // save the data sent by user to jump to this intent somewhere!
         
-        session.conversationData.start = session.message.text ;  //starting para of the user
+        session.conversationData.mainEntry = session.message.text ;  //starting para of the user
 
         builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|Help", { listStyle : builder.ListStyle.auto});
         //experimental
@@ -173,41 +179,61 @@ bot.dialog('/main', [
                 case "Proper Noun\n<Entities>":
                     // session.beginDialog('/events');
                     //call a JS in the source here
-
+                    session.send("Proper Noun case detected");
                     break;
                 case "Current info\n<News>":
                     //call a JS in the source here
-                    // session.beginDialog('/schedule');
+                    session.send("Current info case detected");                    
                     break;
                 case "People also search for\n<Recommendations/Similar>":
-                    session.beginDialog('/complaint');
+                    //call a JS in the source here
                     break;
                 case "Scientific Domain\n<Academica>":
-                    session.beginDialog('/converse');
+                    //call a JS in the source here
                     break;
                 case "Term-Defination\n<Meaning>":
-                    session.beginDialog('/papers');
+                    //call a JS in the source here//and the displayer
                     break;
                 case "Help":
-                    session.beginDialog('/help');
+                    //call a JS in the source here
+                    session.beginDialog("/help")
                     break;
                 case "Exit":
-                    session.beginDialog('/exit');
+                    session.replaceDialog('/exit');
                     break;
             }
             // }
         }
         else {
-            session.endDialog("Invalid Response. You can call again by texting the paragraph you want to analyze");
+            session.endDialog("Invalid Response. You can start again by texting the paragraph you want to analyze");
         }
+    },
+    function (session, args,next) {
+        // The menu runs a loop until the user chooses to (quit).
+        session.Prompts.confirm("Do you want some more external links to the common search enginers ? ")
     },
     function (session, results) {
         // The menu runs a loop until the user chooses to (quit).
+        // session.conversationData.moreBool = results.response;
+        
+        //CHECK SYNTAX BELOW
+        if(results.response == true ){
+            session.replaceDialog('/more');
+        }
         session.endDialog();
     }    
 ]);
 
-
+bot.dialog('/more',[
+    function(session,args,next){
+        //session.conversationData.mainEntry will contain the original text, meanwhile we can store the keywords
+        //call some common search engine dictionary
+    },
+    function(session,results){
+        
+        session.endDialog();
+    }
+])
 
 
 // bot.dialog('/none', [
