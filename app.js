@@ -115,10 +115,14 @@ function findAllFromName(entityName) {
 bot.dialog('/main', [
     function (session, args, next) {
         //check for the user-data completeness here
+        
+        // idk why the below function call is required
+        next();
     },
     function (session, args, next) {
         //think on the line
         builder.Prompts.text(session, 'This is the prompt in main inent in function 2');
+        
     },
     function (session, results) {
         if (results.response) {
@@ -145,7 +149,7 @@ bot.dialog('/help', [
             .title("Analyzer Bot")
             .text("Increasing your productivity")
             .images([
-                builder.CardImage.create(session, "https://googleen.i.lithium.com/html/assets/Google_Analytics.png")
+                builder.CardImage.create(session, "https://blog.growthexp.com/wp-content/uploads/2017/08/Analytics.jpg")
             ]);
         var msg = new builder.Message(session).attachments([introCard]);
         session.send(msg);
