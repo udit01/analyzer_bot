@@ -47,6 +47,12 @@ result is still a proper word. Matches unrelated terms as well if capitalised or
 can handle reference text nicely.
 
 
+knowledge exporation service
+
+downloadable for free trial, can't test but enables definition of a grammar/schema for mapping search 
+queries with query type to compose queries and later use knowledge graph with generated query.
+
+
 
 
 
