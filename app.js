@@ -1,65 +1,3 @@
-'use strict';
-
-let https = require('https');
-
-// **********************************************
-// *** Update or verify the following values. ***
-// **********************************************
-
-// Replace the subscriptionKey string value with your valid subscription key.
-let subscriptionKey = '8a6bfd27c4c54577b0ed73d688f2c801';
-
-// Verify the endpoint URI.  At this writing, only one endpoint is used for Bing
-// search APIs.  In the future, regional endpoints may be available.  If you
-// encounter unexpected authorization errors, double-check this host against
-// the endpoint for your Bing Web search instance in your Azure dashboard.
-let host = 'api.cognitive.microsoft.com';
-let path = '/bing/v7.0/search';
-
-let term = 'Microsoft Cognitive Services';
-
-let response_handler = function (response) {
-    let body = '';
-    response.on('data', function (d) {
-        body += d;
-    });
-    response.on('end', function () {
-        console.log('\nRelevant Headers:\n');
-        for (var header in response.headers)
-            // header keys are lower-cased by Node.js
-            if (header.startsWith("bingapis-") || header.startsWith("x-msedge-"))
-                 console.log(header + ": " + response.headers[header]);
-        body = JSON.stringify(JSON.parse(body), null, '  ');
-        console.log('\nJSON Response:\n');
-        console.log(body);
-    });
-    response.on('error', function (e) {
-        console.log('Error: ' + e.message);
-    });
-};
-
-let bing_web_search = function (search) {
-  console.log('Searching the Web for: ' + term);
-  let request_params = {
-        method : 'GET',
-        hostname : host,
-        path : path + '?q=' + encodeURIComponent(search),
-        headers : {
-            'Ocp-Apim-Subscription-Key' : subscriptionKey,
-        }
-    };
-
-    let req = https.request(request_params, response_handler);
-    req.end();
-}
-
-if (subscriptionKey.length === 32) {
-    bing_web_search(term);
-} else {
-    console.log('Invalid Bing Search API subscription key!');
-    console.log('Please paste yours into the source code.');
-}
-
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
@@ -105,7 +43,7 @@ var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
 //CUSTOM ENV VARIABLES:
-var surveyFormUrl = process.env.FormURL;
+var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -128,15 +66,15 @@ var surveyFormUrl = process.env.FormURL;
 bot.dialog('/', intents);   
 intents.matches('Greeting', '/greeting');
 intents.matches('Help', '/help');
-// intents.matches('Main', '/main');
 intents.matches('Exit', '/exit');
 intents.matches('More', '/more');//difficult ?
-// intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
 intents.matches('None', '/main')
-// different than campus bot
+// intents.matches('Main', '/main');
+// intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
+
 intents.onDefault((session) => {//for NONE
     // DO SOMETHING RANDOM HERE ----------------------------------------LIKE THOUGHTFUL THINGS OR QUOTES ETC ---------------------  
-    session.send('This is the default intent \'%s\'.', session.message.text);
+    session.send('This is the default intent and it repeates your message: \'%s\'.', session.message.text);
 });
 
 
@@ -154,21 +92,37 @@ bot.dialog('/greeting', [
     //      builder.Prompts.text(session, 'Hello there! I am analyzer bot ');
     // },
     function (session, results) {
-        session.send('Hello there! I am analyzer bot and  ');
-        // session.replaceDialog('/main');
-        session.endDialog();
+        session.send('Hello there! I am analyzer bot and send the para you want to analyze');
+        session.Prompts
+        // session.endDialog();
+
+        // i dont want to come back
+        session.replaceDialog('/main');
     }
 ]);
 
 
 
 bot.dialog('/exit', [
-    function (session, results) {
+    function (session, args, next) {
         //add would you really like to delete conversational data ?
-        session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
-        session.send(surveyFormUrl);
-        session.endConversation();
-    }
+        builder.Prompts.confirm(session, "Are you sure you wish to delete this conversation's context?");
+    },
+    function (session,results) {
+        //experimental
+        session.userData.exitBool = results.response;//does it return yes no ?
+        // session.sendTyping();
+        if(session.userData.exitBool == true){
+            session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
+            session.send(FeedbackFormUrl);
+            session.endConversation();
+        }
+        else{
+            //i want to start a new dialogue not come back
+            session.replaceDialog('/greeting');
+        }
+        
+    },
 ]);
 
 bot.dialog('/help', [
@@ -197,41 +151,60 @@ bot.dialog('/main', [
         //check for the user-data completeness here
         // save the data sent by user to jump to this intent somewhere!
         
-        // session.conversationData.start = 
+        session.conversationData.start = session.message.text ;  //starting para of the user
 
-        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>| Current info\n<News>|People also search for\n<Recommendations>|Scientific Papers\n<Academica>| Term-Defination | Help");
-        
-        // idk why the below function call is required
-        // next();
+        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|Help", { listStyle : builder.ListStyle.auto});
+        //experimental
+        // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
     function (session, args, next) {
         //experimental
         session.sendTyping();
-        term = args;
-		session.send(bing_web_search(term));
-    },
-    function (session, results) {
+        // term = args;
+        // session.send(bing_web_search(term));
+        
         if (results.response) {
-            
-            session.send(results.response.entity);
-            
-            if (results.response.entity === 'Exit') {
-                
-                session.endDialog("You can chat again by saying Hi");
+            // var intents_in_resp = results.response.intents;
+            // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
+            //     session.endDialog("Thanks for using. You can chat again by saying Hi");
+            // }
+            // else {
+            switch (results.response.entity) {
+                case "Proper Noun\n<Entities>":
+                    // session.beginDialog('/events');
+                    //call a JS in the source here
+
+                    break;
+                case "Current info\n<News>":
+                    //call a JS in the source here
+                    // session.beginDialog('/schedule');
+                    break;
+                case "People also search for\n<Recommendations/Similar>":
+                    session.beginDialog('/complaint');
+                    break;
+                case "Scientific Domain\n<Academica>":
+                    session.beginDialog('/converse');
+                    break;
+                case "Term-Defination\n<Meaning>":
+                    session.beginDialog('/papers');
+                    break;
+                case "Help":
+                    session.beginDialog('/help');
+                    break;
+                case "Exit":
+                    session.beginDialog('/exit');
+                    break;
             }
-            else {
-                session.send('Hey! you are in the main intent! function 3');                
-            }
+            // }
         }
         else {
-            session.endDialog("Invalid Response. You can call again by saying Hi");
+            session.endDialog("Invalid Response. You can call again by texting the paragraph you want to analyze");
         }
     },
     function (session, results) {
         // The menu runs a loop until the user chooses to (quit).
-        // session.replaceDialog('/main');
         session.endDialog();
-    }
+    }    
 ]);
 
 
