@@ -98,19 +98,20 @@ var e2d = require('./src/entity2dict');
 
 
 // Custom functions -----------------------------------------
-function findAllFromName(entityName) {
-    var dict = []
+function findAllFromName(entities,entityName) {
+    var arr = []
 
     try {
-        dict = builder.EntityRecognizer.findAllEntities(args.entities, entityName);
+        arr = builder.EntityRecognizer.findAllEntities(entities, entityName);
     }
     catch (e) {
-        dict = [];
+        arr = [];
     }
-    // if ((dict != null) || (dict) || (dict.length != 0)) {
+    // if ((arr != null) || (arr) || (arr.length != 0)) {
 
     // }
-    return dict;
+    // console.log("----------------------Line : 113 " + arr[0].entity);
+    return arr;
 }
 
 
@@ -175,8 +176,9 @@ bot.dialog('/cancel', [
     function (session , results){
         session.send('After this message the stack will be reset by session.replaceDialogue(main)');
         // session.replaceDialog('/main');
-        session.clearDialogStack();
-        session.endDialog();
+        // session.clearDialogStack();
+        // session.endDialog();
+        session.endConversation();
     }
 ]);
 
@@ -200,15 +202,15 @@ bot.dialog('/greeting', [
 
 bot.dialog('/repeat', [
     function (session, args, next) {
-        builder.Prompts.text(session, 'You are in repeat intent (probably again) and I am prompting you to say something so that i will repeat it');
         
-        var cancel_dict = e2d.findAllFromName('Cancel');
+        var text_dict = findAllFromName(args.entities,'repeat-text');
+
+        // console.log("----------------------Line 205 " + args);
+       
         //want to test this but too dificult ?
-        if ((cancel_dict != null) || (cancel_dict) || (cancel_dict.length != 0) ){
-            session.replaceDialog('/cancel');
-        }
+        // console.log("------------------------------LINE 207 " + ((cancel_dict != null) || (cancel_dict) || (cancel_dict.length != 0)) )
+     
         
-        var text_dict = e2d.findAllFromName('repeat-text');
         // try{
         //     text_dict = builder.EntityRecognizer.findAllEntities(args.entities,'repeat-text');
         // }
@@ -216,25 +218,38 @@ bot.dialog('/repeat', [
         //     text_dict = [];
         // }
         
-        if ((text_dict != null) || (text_dict) || (text_dict.length != 0)) {
-            session.replaceDialog('/repeat');
-        }
-        
+        // if ((text_dict != null) || (text_dict) || (text_dict.length != 0)) {
+        //     session.replaceDialog('/repeat');
+        // }
+        console.log("----------------------Line : 223 " + text_dict[0] + "and dict lenght = " + text_dict.length );
         var text_to_repeat = "";
         
         for (var i = 0; i <  text_dict.length - 1 ; i++){
-            text_to_repeat += text_dict[i] + " " ;     
+            text_to_repeat += text_dict[i].entity + " " ;     
         }
-        text_to_repeat += text_dict[ text_dict.length - 1] ;
+        if(text_dict.length!=0){
+            text_to_repeat += text_dict[text_dict.length - 1].entity ;
+        }
 
-        next({ response : text_to_repeat  });
+        console.log("----------------------Line : 231 " + text_to_repeat);
+
+
+        next({ ttr : text_to_repeat  });
     },
     function (session, results) {        
         
         
-        session.send('I think you said this :'+ text_to_repeat);
-        session.send('Now sending you to main intent');
-        session.replaceDialog('/main');
+        session.send('I think you said this :'+ results.ttr);
+
+        builder.Prompts.text(session, 'You are in repeat intent (probably again) and I am prompting you to say something to cancel or go again');
+        var cancel_dict = findAllFromName(results.entities,'Exit');
+        console.log("----------------------Line : 241 " + cancel_dict);
+        
+        if ( (cancel_dict!=undefined) || (cancel_dict != null) ||  (cancel_dict.length != 0) ){
+            session.replaceDialog('/cancel');
+        }
+        // session.send('Now sending you to main intent');
+        // session.replaceDialog('/main');
         session.endDialog();
     }
 ]);
