@@ -24,22 +24,22 @@ let response_handler = function (response) {
         body += d;
     });
     response.on('end', function () {
-        session.send('\nRelevant Headers:\n');
+        console.log('\nRelevant Headers:\n');
         for (var header in response.headers)
             // header keys are lower-cased by Node.js
             if (header.startsWith("bingapis-") || header.startsWith("x-msedge-"))
-                 session.send(header + ": " + response.headers[header]);
+                 console.log(header + ": " + response.headers[header]);
         body = JSON.stringify(JSON.parse(body), null, '  ');
-        session.send('\nJSON Response:\n');
-        session.send(body);
+        console.log('\nJSON Response:\n');
+        console.log(body);
     });
     response.on('error', function (e) {
-        session.send('Error: ' + e.message);
+        console.log('Error: ' + e.message);
     });
 };
 
 let bing_web_search = function (search) {
-  session.send('Searching the Web for: ' + term);
+  console.log('Searching the Web for: ' + term);
   let request_params = {
         method : 'GET',
         hostname : host,
@@ -56,8 +56,8 @@ let bing_web_search = function (search) {
 if (subscriptionKey.length === 32) {
     bing_web_search(term);
 } else {
-    session.send('Invalid Bing Search API subscription key!');
-    session.send('Please paste yours into the source code.');
+    console.log('Invalid Bing Search API subscription key!');
+    console.log('Please paste yours into the source code.');
 }
 
 var restify = require('restify');
@@ -176,6 +176,7 @@ bot.dialog('/main', [
     },
     function (session, args, next) {
         term = args;
+		session.send(bing_web_search(term));
     },
     function (session, results) {
         if (results.response) {
