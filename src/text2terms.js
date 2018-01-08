@@ -1,5 +1,3 @@
-import { request } from 'http';
-
 //finding terms from paragraph using text analysis API
 
 let accessKey = process.env.TextAnalyticsAPIKey;

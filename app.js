@@ -10,8 +10,8 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
   
 // Create chat connector for communicating with the Bot Framework Service
 var connector = new builder.ChatConnector({
-    appId: process.env.MicrosoftAppId,
-    appPassword: process.env.MicrosoftAppPassword,
+    // appId: process.env.MicrosoftAppId,
+    // appPassword: process.env.MicrosoftAppPassword,
     openIdMetadata: process.env.BotOpenIdMetadata 
 });
 
@@ -46,7 +46,7 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 //external sources
-var t2t = require('./src/text2terms.js');
+var t2t = require('./src/text2terms');
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -174,7 +174,9 @@ bot.dialog('/main', [
         t2t.get_terms(session.conversationData.start, 
 			function (jsonarr){
 				session.conversationData.terms = jsonarr;
-			})
+            })
+            
+
         if (results.response) {
             // var intents_in_resp = results.response.intents;
             // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
