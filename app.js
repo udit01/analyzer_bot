@@ -45,6 +45,9 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 //CUSTOM ENV VARIABLES:
 var FeedbackFormUrl = process.env.FeedbackFormURL;
 
+//external sources
+var t2t = require('./src/text2terms.js');
+
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
 // })
@@ -162,7 +165,10 @@ bot.dialog('/main', [
         session.sendTyping();
         // term = args;
         // session.send(bing_web_search(term));
-        
+        t2t.get_terms(session.conversationData.start, 
+			function (jsonarr){
+				session.conversationData.terms = jsonarr;
+			})
         if (results.response) {
             // var intents_in_resp = results.response.intents;
             // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
