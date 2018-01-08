@@ -56,6 +56,7 @@ var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 //external sources
 var t2t = require('./src/text2terms');
+var t2s = require('./src/bing_search');
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -180,11 +181,16 @@ bot.dialog('/main', [
         // term = args;
         session.conversationData.mainPrompt = args.response.text;//why is this not getting any text ?
         try{
-            t2t.get_terms(session.conversationData.mainEntry, 
-                function (jsonarr){
-                    session.conversationData.terms = jsonarr;
-                    session.send("Your key terms are "+session.conversationData.terms);
-                });
+            // t2t.get_terms(session.conversationData.mainEntry, 
+            //     function (jsonarr){
+            //         session.conversationData.terms = jsonarr;
+            //         session.send("Your key terms are "+session.conversationData.terms);
+            //     });
+            t2s.getData(session.conversationData.mainEntry,
+                    function(jsondat){
+                        session.conversationData.briefs = jsondat;
+                        session.send("Search results are "+ session.conversationData.briefs) 
+                    })
         }
         catch(e){
             console.log(""+e);
