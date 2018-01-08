@@ -1,5 +1,6 @@
 ignore/
 envVar/
+src/text2termspre
 .vs/
 
 node_modules/

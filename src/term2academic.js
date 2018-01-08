@@ -9,13 +9,12 @@ let https = require ('https');
 // Replace the subscriptionKey string value with your valid subscription key.
 let subscriptionKey = '';
 
-let host = 'api.cognitive.microsoft.com';
-let path = '/bing/v7.0/entities';
+let host = 'westus.api.cognitive.microsoft.com';
+let path = '/academic/v1.0/evaluate';
 
-let mkt = 'en-US';
-let q = 'two roads diverged';
+let q = "Composite(F.FN=='biology')";
 
-let params = '?mkt=' + mkt + '&q=' + encodeURI(q);
+let params = '?expr=' + encodeURI(q) + "&attributes=Ti,Y,CC,AA.AuN,AA.AuId";
 
 let response_handler = function (response) {
     let body = '';
@@ -24,18 +23,18 @@ let response_handler = function (response) {
     });
     response.on ('end', function () {
         let body_ = JSON.parse (body);
-		if (body_.entities != undefined && body_.entities.value != undefined){
-			body_ = body_['entities']['value'];
+		if (body_.entities != undefined){
+			body_ = body_['entities'];
 			for (var i in body_){
-				delete body_[i].contractualRules;
-				delete body_[i].webSearchUrl;
-				delete body_[i].bingId;
-				delete body_[i].entityPresentationInfo;
-				body_[i]["image"] = body_[i]["image"]["hostPageUrl"];
+				delete body_[i].logprob;
+				delete body_[i].Id;
+				// delete body_[i].bingId;
+				// delete body_[i].entityPresentationInfo;
+				//body_[i]= body_[i]["rules"][0]["output"]["value"];
 			}
-		}
-		else{
-			body_ = body_.queryContext;
+		// }
+		// else{
+			// body_ = body_.queryContext;
 		}
         let body__ = JSON.stringify (body_, null, '  ');
         console.log (body__);
