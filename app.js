@@ -183,7 +183,7 @@ bot.dialog('/main', [
             t2t.get_terms(session.conversationData.mainEntry, 
                 function (jsonarr){
                     session.conversationData.terms = jsonarr;
-                    session.send("Your"+session.conversationData.terms);
+                    session.send("Your key terms are "+session.conversationData.terms);
                 });
         }
         catch(e){
