@@ -1,3 +1,5 @@
+import { request } from 'http';
+
 //finding terms from paragraph using text analysis API
 
 let accessKey = process.env.TextAnalyticsAPIKey;
@@ -44,6 +46,8 @@ let get_key_phrases = function (documents, func) {
     };
 	
 	
+	// let req = https.request (request_params , response_handler);
+
     let req = https.request (request_params, function (response) {
 		let body = '';
 		response.on ('data', function (d) {
@@ -61,6 +65,8 @@ let get_key_phrases = function (documents, func) {
 			console.log ('Error: ' + e.message);
 		});
 	});
+
+
     req.write (body);
 	req.end ();
 	//console.log("finend");
