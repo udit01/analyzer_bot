@@ -10,8 +10,8 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
   
 // Create chat connector for communicating with the Bot Framework Service
 var connector = new builder.ChatConnector({
-    // appId: process.env.MicrosoftAppId,
-    // appPassword: process.env.MicrosoftAppPassword,
+    appId: process.env.MicrosoftAppId,
+    appPassword: process.env.MicrosoftAppPassword,
     openIdMetadata: process.env.BotOpenIdMetadata 
 });
 
@@ -170,13 +170,16 @@ bot.dialog('/main', [
         //experimental
         session.sendTyping();
         // term = args;
+        session.conversationData.mainPrompt = args.response.text;
         // session.send(bing_web_search(term));
         t2t.get_terms(session.conversationData.start, 
 			function (jsonarr){
 				session.conversationData.terms = jsonarr;
             })
-            
-
+        
+        session.send(session.conversationData.mainPrompt);
+        session.send(session.conversationData.terms);
+        
         if (results.response) {
             // var intents_in_resp = results.response.intents;
             // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
