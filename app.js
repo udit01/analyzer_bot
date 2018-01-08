@@ -1,3 +1,10 @@
+/*
+    Proactive messages
+    Rich cards
+    Input Hints
+    Typing Indicator
+*/
+
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
@@ -163,7 +170,7 @@ bot.dialog('/main', [
         // save the data sent by user to jump to this intent somewhere!
         
         session.conversationData.mainEntry = session.message.text ;  //starting para of the user
-        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
+        builder.Prompts.choice(session, "What would you like search results about \n<Index Number>?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
@@ -176,7 +183,7 @@ bot.dialog('/main', [
             t2t.get_terms(session.conversationData.mainEntry, 
                 function (jsonarr){
                     session.conversationData.terms = jsonarr;
-                    session.send("Your"+session.conversationData.terms);
+                    session.send("Your key terms are "+session.conversationData.terms);
                 });
         }
         catch(e){
@@ -226,7 +233,7 @@ bot.dialog('/main', [
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
-                    session.send("Ext search engine links requested");
+                    session.send("External search engine links requested");
                     session.beginDialog('/more');
                 case "Help":
                     //do i want the help dialogue to return here ?
