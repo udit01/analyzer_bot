@@ -163,7 +163,7 @@ bot.dialog('/main', [
         // save the data sent by user to jump to this intent somewhere!
         
         session.conversationData.mainEntry = session.message.text ;  //starting para of the user
-        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|Help|Exit", { listStyle : builder.ListStyle.auto});
+        builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
@@ -171,7 +171,7 @@ bot.dialog('/main', [
         //experimental
         session.sendTyping();
         // term = args;
-        session.conversationData.mainPrompt = args.response.text;
+        session.conversationData.mainPrompt = args.response.text;//why is this not getting any text ?
         try{
             t2t.get_terms(session.conversationData.mainEntry, 
                 function (jsonarr){
@@ -203,24 +203,31 @@ bot.dialog('/main', [
                     //call a JS in the source here
                     session.send("Proper Noun case detected");
                     //call the proper noun dialogue with session.begin
-                    // session.beginDialog('/properNoun');//With what data ?
+                    session.beginDialog('/properNoun');//With what data ?
                     break;
                 case "Current info\n<News>":
                     //call a JS in the source here
-                    session.send("Current info case detected");                    
+                    session.send("Current info case detected");  
+                    session.beginDialog('/current');                  
                     break;
                 case "People also search for\n<Recommendations/Similar>":
                     //call a JS in the source here
                     session.send("People also search for case detected");
+                    session.beginDialog('/similar');                                      
                     break;
                 case "Scientific Domain\n<Academica>":
                     //call a JS in the source here
                     session.send("Scientific domain case detected");
+                    session.beginDialog('/acad');                                      
                     break;
                 case "Term-Defination\n<Meaning>":
                     //call a JS in the source here//and the displayer
                     session.send("Term defination case detected");
+                    session.beginDialog('/meaning');                                      
                     break;
+                case "External Search Engine(s) Links":
+                    session.send("Ext search engine links requested");
+                    session.beginDialog('/more');
                 case "Help":
                     //do i want the help dialogue to return here ?
                     session.beginDialog("/help")
@@ -228,8 +235,8 @@ bot.dialog('/main', [
                 case "Exit":
                     session.replaceDialog('/exit');
                     break;
-                default:
-                    session.replaceDialog('/more')
+                // default:
+                //     session.replaceDialog('/more')
                 //PUSH IT INTO A GENERIC SEARCH OR MORE CASE 
             }
             // }
@@ -254,6 +261,58 @@ bot.dialog('/main', [
     }    
 ]);
 
+
+//below dialogue calls the JS and prettifies the output
+bot.dialog('/properNoun', [
+    function (session, args, next) {
+        //call some API in the src directory with the conversation data you have
+    },
+    function (session, results) {
+
+        session.endDialog();
+    }
+]);
+
+bot.dialog('/current', [
+    function (session, args, next) {
+        //call some API in the src directory with the conversation data you have
+    },
+    function (session, results) {
+
+        session.endDialog();
+    }
+]);
+
+bot.dialog('/similar', [
+    function (session, args, next) {
+        //call some API in the src directory with the conversation data you have
+    },
+    function (session, results) {
+
+        session.endDialog();
+    }
+]);
+
+bot.dialog('/acad', [
+    function (session, args, next) {
+        //call some API in the src directory with the conversation data you have
+    },
+    function (session, results) {
+
+        session.endDialog();
+    }
+]);
+
+bot.dialog('/meaning', [
+    function (session, args, next) {
+        //call some API in the src directory with the conversation data you have
+    },
+    function (session, results) {
+
+        session.endDialog();
+    }
+]);
+
 bot.dialog('/more',[
     function(session,args,next){
         //session.conversationData.mainEntry will contain the original text, meanwhile we can store the keywords
@@ -264,18 +323,9 @@ bot.dialog('/more',[
         
         session.endDialog();
     }
-])
+]);
 
-//below dialogue calls the JS and prettifies the output
-bot.dialog('/properNoun',[
-    function (session, args, next) {
-        //call some API in the src directory with the conversation data you have
-    },
-    function (session, results) {
 
-        session.endDialog();
-    }
-])
 
 // bot.dialog('/none', [
 //     function (session) {
