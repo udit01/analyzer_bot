@@ -1,6 +1,6 @@
 //finding terms from paragraph using text analysis API
 
-let accessKey = process.env.TextAnalyticsAPIKey;
+var accessKey = process.env.TextAnalyticsAPIKey;
 
 'use strict';
 
@@ -22,7 +22,7 @@ let uri = 'westcentralus.api.cognitive.microsoft.com';
 let path = '/text/analytics/v2.0/keyPhrases';
 
 let get_terms = function (inp, func1){
-	console.log("in get_terms\n");
+	
 	let documents = { 'documents': [
     { 'id': '1', 'language': 'en', 'text': inp }
     ]};
@@ -33,7 +33,7 @@ let get_terms = function (inp, func1){
 let get_key_phrases = function (documents, func) {
 	
     let body = JSON.stringify (documents);
-	console.log("json\n\n"+body+"\n\n");
+	// console.log("json\n\n"+body+"\n\n");
     let request_params = {
         method : 'POST',
         hostname : uri,
@@ -42,22 +42,17 @@ let get_key_phrases = function (documents, func) {
             'Ocp-Apim-Subscription-Key' : accessKey,
         }
     };
-	
-	
-	// let req = https.request (request_params , response_handler);
 
     let req = https.request (request_params, function (response) {
 		let body = '';
 		response.on ('data', function (d) {
 			body += d;
-			console.log("\n\n"+body+"\n\n");
 		});
 		response.on ('end', function () {
 			let body_ = JSON.parse (body);
 			let body__ = body_['documents'][0]['keyPhrases'];
-			// let body__ = JSON.stringify (body_, null, '  ');
+			// let body___ = JSON.stringify (body__, null, '  ');
 			func(body__);
-			console.log ("features: "+body__);
 		});
 		response.on ('error', function (e) {
 			console.log ('Error: ' + e.message);
@@ -67,11 +62,8 @@ let get_key_phrases = function (documents, func) {
 
     req.write (body);
 	req.end ();
-	//console.log("finend");
 }
 
-// var a=get_terms("This chapter focuses on Arrays, Objects and Functions. There are a number of useful ECMAScript 5 features which are supported by V8, such as Array.forEach(), Array.indexOf(), Object.keys() and String.trim().");
-// console.log(a+" get_terms");
 
 module.exports = {
 		'get_terms' : get_terms,
