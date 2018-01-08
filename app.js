@@ -38,12 +38,14 @@ var luisAPIKey = process.env.LuisAPIKey;
 var luisAPIHostName = process.env.LuisAPIHostName || 'westus.api.cognitive.microsoft.com';
 const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v1/application?id=' + luisAppId + '&subscription-key=' + luisAPIKey;
 
+
 // Main dialog with LUIS
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
 //CUSTOM ENV VARIABLES:
 var FeedbackFormUrl = process.env.FeedbackFormURL;
+// var TextAnalyticsAPIKey = process.env.TextAnalyticsAPIKey;
 
 //external sources
 var t2t = require('./src/text2terms');
@@ -96,7 +98,7 @@ bot.dialog('/greeting', [
     // },
     function (session, args,next) {
         // session.send('Hello there! I am analyzer bot and send the para you want to analyze');
-        session.Prompts.text(session, 'Hello there! I am analyzer bot and text the para you want to analyze.')
+        builder.Prompts.text(session, 'Hello there! I am analyzer bot and text the para you want to analyze.')
     
     },
     function(session,results){
@@ -161,7 +163,6 @@ bot.dialog('/main', [
         // save the data sent by user to jump to this intent somewhere!
         
         session.conversationData.mainEntry = session.message.text ;  //starting para of the user
-
         builder.Prompts.choice(session, "What would you like search results about \n(type end to quit)?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|Help|Exit", { listStyle : builder.ListStyle.auto});
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
@@ -171,16 +172,20 @@ bot.dialog('/main', [
         session.sendTyping();
         // term = args;
         session.conversationData.mainPrompt = args.response.text;
-        // session.send(bing_web_search(term));
-        t2t.get_terms(session.conversationData.start, 
-			function (jsonarr){
-				session.conversationData.terms = jsonarr;
-            })
+        try{
+            t2t.get_terms(session.conversationData.mainEntry, 
+                function (jsonarr){
+                    session.conversationData.terms = jsonarr;
+                    session.send("Your"+session.conversationData.terms);
+                });
+        }
+        catch(e){
+            console.log(""+e);
+        }
         
         session.send(session.conversationData.mainPrompt);
-        session.send(session.conversationData.terms);
         
-        if (results.response) {
+        if (args.response) {
             // var intents_in_resp = results.response.intents;
             // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
             //     session.endDialog("Thanks for using. You can chat again by saying Hi");
@@ -192,7 +197,7 @@ bot.dialog('/main', [
             //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
             
             
-            switch (results.response.entity) {
+            switch (args.response.entity) {
                 case "Proper Noun\n<Entities>":
                     // session.beginDialog('/events');
                     //call a JS in the source here
@@ -235,7 +240,7 @@ bot.dialog('/main', [
     },
     function (session, args,next) {
         // The menu runs a loop until the user chooses to (quit).
-        session.Prompts.confirm("Do you want some more external links to the common search enginers ? ")
+        builder.Prompts.confirm("Do you want some more external links to the common search enginers ? ")
     },
     function (session, results) {
         // The menu runs a loop until the user chooses to (quit).
