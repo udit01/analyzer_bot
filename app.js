@@ -94,8 +94,8 @@ var introMessage = ['I help to find relevant information both current and all-ti
     'Deveoped by :-\n Udit Jain, Soumya Sharma, Akshat Khare.'
 ];
 
-var helpMessage = ['This message will contain the usage information how to use.\n Next Line',
-    'Another Message.'
+var helpMessage = ['This message will contain the usage information how to use.\n Next Line'
+    // , 'Another Message.'
 ];
 
 
@@ -126,11 +126,11 @@ bot.dialog('/exit', [
     },
     function (session,results) {
         //experimental
-        session.userData.exitBool = results.response.text;//does it return yes no ?
+        // session.userData.exitBool = results.response.text;//does it return yes no ?
         // session.sendTyping();
-        
+        console.log("Line 131----------"+ results.response);
         //check syntax
-        if (session.userData.exitBool.toUpperCase() == 'YES'){
+        if (results.response = true){
             session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
             session.send(""+FeedbackFormUrl);
             session.endConversation();

@@ -41,8 +41,8 @@ let response_handler = function (response) {
         console.log(data);
         console.log("data was block ke andar");
         console.log(typeof data);
-         console.log(data._type);
-         console.log("end");
+        console.log(data._type);
+        console.log("end");
          //return data;
         //console.log('\nJSON Response:\n');
         //console.log(body);
