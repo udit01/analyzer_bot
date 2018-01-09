@@ -7,7 +7,7 @@ let https = require('https');
 // **********************************************
 
 // Replace the subscriptionKey string value with your valid subscription key.
-let subscriptionKey = '687ccea589754b4cb055b7b64449a00e';
+let subscriptionKey = '';
 // process.env.BingSearchAPIkey;
 
 // Verify the endpoint URI.  At this writing, only one endpoint is used for Bing
@@ -23,6 +23,39 @@ let path = '/bing/v7.0/search';
 
 let getData = function(inp, func1){
     console.log('Searching the Web for: ' + inp);
+
+let response_handler = function (response) {
+    let body = '';
+    response.on('data', function (d) {
+        console.log("when was this executed");
+        body += d;
+    });
+    response.on('end', function () {
+        // console.log('\nRelevant Headers:\n');
+        // for (var header in response.headers)
+        //     // header keys are lower-cased by Node.js
+        //     if (header.startsWith("bingapis-") || header.startsWith("x-msedge-"))
+        //         console.log(header + ": " + response.headers[header]);
+        console.log("step2")
+        data = JSON.parse(body);
+        body = JSON.stringify(data, null, '  ');
+        console.log("dekho toh");
+        console.log(data);
+        console.log("data was block ke andar");
+        console.log(typeof data);
+        console.log(data._type);
+        console.log("end");
+         //return data;
+        //console.log('\nJSON Response:\n');
+        //console.log(body);
+    });
+    response.on('error', function (e) {
+        console.log('Error: ' + e.message);
+    });
+};
+
+let bing_web_search = function (search) {
+     console.log('Searching the Web for: ' + term);
     let request_params = {
         method: 'GET',
         hostname: host,

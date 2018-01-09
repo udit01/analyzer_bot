@@ -94,8 +94,8 @@ var introMessage = ['I help to find relevant information both current and all-ti
     'Deveoped by :-\n Udit Jain, Soumya Sharma, Akshat Khare.'
 ];
 
-var helpMessage = ['This message will contain the usage information how to use.\n Next Line',
-    'Another Message.'
+var helpMessage = ['This message will contain the usage information how to use.\n Next Line'
+    // , 'Another Message.'
 ];
 
 
@@ -126,11 +126,10 @@ bot.dialog('/exit', [
     },
     function (session,results) {
         //experimental
-        session.userData.exitBool = results.response.text;//does it return yes no ?
+        // session.userData.exitBool = results.response.text;//does it return yes no ?
         // session.sendTyping();
-        
         //check syntax
-        if (session.userData.exitBool.toUpperCase() == 'YES'){
+        if (results.response == true){
             session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
             session.send(""+FeedbackFormUrl);
             session.endConversation();
@@ -160,7 +159,7 @@ bot.dialog('/help', [
         helpMessage.forEach(function (ms) {
             session.send(ms);
         });
-        session.endDialog();
+        session.endDialog(session);
     }
 ]);
 
@@ -170,27 +169,36 @@ bot.dialog('/main', [
         // save the data sent by user to jump to this intent somewhere!
         
         session.conversationData.mainEntry = session.message.text ;  //starting para of the user
+        
+        session.sendTyping();
+        
+        try {
+            t2t.get_terms(session.conversationData.mainEntry,
+                function (jsonarr) {
+                    session.conversationData.terms = jsonarr;
+                    session.send("Your key terms detected by us are :" + session.conversationData.terms);
+
+                });
+        }
+        catch (e) {
+            console.log("" + e);
+        }
+
         builder.Prompts.choice(session, "What would you like search results about \n<Index Number>?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
+    // function (session, args, next) {
+    //     //experimental
+    //     // term = args;
+    // },
     function (session, args, next) {
-        //experimental
-        session.sendTyping();
-        // term = args;
-        session.conversationData.mainPrompt = args.response.text;//why is this not getting any text ?
-        try{
-            t2t.get_terms(session.conversationData.mainEntry, 
-                function (jsonarr){
-                    session.conversationData.terms = jsonarr;
-                    session.send("Your key terms are "+session.conversationData.terms);
-                });
-        }
-        catch(e){
-            console.log(""+e);
-        }
         
-        session.send(session.conversationData.mainPrompt);
+        session.conversationData.mainPrompt = args.response;//why is this not getting any text ?
+        
+        session.sendTyping();
+        
+        session.send("You selected option:"+session.conversationData.mainPrompt);
         
         if (args.response) {
             // var intents_in_resp = results.response.intents;
