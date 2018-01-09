@@ -56,6 +56,8 @@ var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 //external sources
 var t2t = require('./src/text2terms');
+// var t2s = require('./src/bingSearch');
+var t2r = require('./src/bingRelatedSearch');
 var t2i = require('./src/term2info');
 var t2a = require('./src/term2academic');
 var bs = require('./src/bingSearch');
@@ -176,6 +178,30 @@ bot.dialog('/main', [
         session.sendTyping();
         
         try {
+            // uncomment to get back the terms data
+            // t2t.get_terms(session.conversationData.mainEntry,
+            //     function (jsonarr) {
+            //         session.conversationData.terms = jsonarr;
+            //         session.send("Your key terms detected by us are :" + session.conversationData.terms);
+
+            // });
+
+
+            //below is the code to print the searched data
+            // t2s.getData(session.conversationData.mainEntry,
+            //     function(jsondat){
+            //         session.conversationData.searchedData = jsondat;
+            //         session.send(session.conversationData.searchedData);
+            //     }
+            // );
+
+            //below is the code for printing the related search data
+            // t2r.getRelatedData(session.conversationData.mainEntry,
+            //     function(jsonrelateddat){
+            //         session.conversationData.relatedsearchedData = jsonrelateddat;
+            //         session.send(session.conversationData.relatedsearchedData);
+            //     }
+            // );
             session.conversationData.boolTermsAPI = false;
 
             function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
