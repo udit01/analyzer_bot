@@ -57,7 +57,8 @@ var FeedbackFormUrl = process.env.FeedbackFormURL;
 //external sources
 var t2t = require('./src/text2terms');
 var t2i = require('./src/term2info');
-var bs = require('./src/bingSearch')
+var t2a = require('./src/term2academic');
+var bs = require('./src/bingSearch');
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -262,11 +263,14 @@ bot.dialog('/main', [
                     break;
                 case "Scientific Domain <Academica>":
                     
-                    //academic api
-                    
-                    //call a JS in the source here
                     session.send("Scientific domain case detected");
+                    //academic api
+                    while (!session.conversationData.boolTermsAPI) {
+                        //waiting for being true
+                    }
+                    //call a JS in the source here
                     session.beginDialog('/acad');                                      
+                    
                     break;
                 case "Term-Defination <Meaning>":
                     //call a JS in the source here//and the displayer
@@ -345,8 +349,8 @@ bot.dialog('/properNoun', [
         next();
     },
     function (session, results) {
-        // session.send("Proper Noun dialogue has ended but wait for API call to finish!");
-        session.endDialog("Proper Noun dialogue has ended but wait for API call to finish!");
+        session.send("Proper Noun dialogue has ended but wait for API call to finish!");
+        // session.endDialog("Proper Noun dialogue has ended but wait for API call to finish!");
     }
 ]);
 
@@ -372,11 +376,33 @@ bot.dialog('/similar', [
 
 bot.dialog('/acad', [
     function (session, args, next) {
-        //call some API in the src directory with the conversation data you have
+        session.send("In Academic dialogue");
+        
+        function callbackTerms2Acad(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+            
+            if (stringCode == "success") {
+                session.send("Your keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
+            }
+            else {
+                // session.send("Your word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
+            }
+            // resolveTrue = true;
+        }
+        for (i in session.conversationData.terms) {
+
+            try {
+                // var resolveTrue = false
+                t2a.get_queries(session.conversationData.terms[i], callbackTerms2Acad);
+            }
+            catch (e) {
+                console.log("" + e);
+            }
+        }
+        next();
     },
     function (session, results) {
-
-        session.endDialog();
+        session.send("End of Academic dialogue");
+        // session.endDialog();
     }
 ]);
 

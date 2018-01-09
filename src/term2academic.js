@@ -10,7 +10,7 @@ let https = require ('https');
 let subscriptionKey = process.env.AcademicKnowledgeAPIKey;
 
 var numberOfResults = 3;
-
+var word = "Default Word in text2academic.js"
 let host = 'westus.api.cognitive.microsoft.com';
 let path = '/academic/v1.0/';
 
@@ -32,7 +32,9 @@ let Search = function (query, funcThroughGQ) {
         body += d;
     });
     response.on ('end', function () {
-        let body_ = JSON.parse (body);
+		let body_ = JSON.parse (body);
+		var stringCode = "success";
+		
 		if (body_.entities != undefined){
 			body_ = body_['entities'];
 			for (var i in body_){
@@ -58,10 +60,11 @@ let Search = function (query, funcThroughGQ) {
 		}
 		else{
 			body_ = body_.queryContext;
+			stringCode = "acad_api_found_nothing.";
 		}
         let body__ = JSON.stringify (body_, null, '  ');
-        console.log (body__);
-		funcThroughGQ(body__);
+		// console.log (body__);
+		funcThroughGQ(body__,word,stringCode);
     });
     response.on ('error', function (e) {
         console.log ('Error: ' + e.message);
@@ -71,7 +74,8 @@ let Search = function (query, funcThroughGQ) {
     req.end ();
 }
 
-let getQueries = function (inp, funcFromApp) {
+let get_queries = function (inp, funcFromApp) {
+	word = inp;
 	let params1 = 'interpret?query=' + encodeURI(inp)
     let request_params = {
         method : 'GET',
@@ -81,6 +85,7 @@ let getQueries = function (inp, funcFromApp) {
             'Ocp-Apim-Subscription-Key' : subscriptionKey,
         }
     };
+
 
     let req = https.request (request_params, function (response) {
     let body = '';
@@ -104,13 +109,18 @@ let getQueries = function (inp, funcFromApp) {
 		// else{
 			// body_ = body_.queryContext;
 		}
+
+		// var stringCode = "success";
+		
         //let body__ = JSON.stringify (body_, null, '  ');
-        console.log (body_);
+        // console.log (body_);
+
 		if (body_[0] != undefined){
-			Search(body_[0], funcFromApp);
 			console.log(body_[0]);
+			Search(body_[0], funcFromApp);
 		}
 		else{
+			// stringCode = "generic";
 			Search(qgeneric(inp), funcFromApp);
 		}			
     });
@@ -153,4 +163,10 @@ function invAbstractConv(jsondata) {
 }
 
 //Search ();
-getQueries("quantum mechanics");
+// getQueries("quantum mechanics");
+
+module.exports = {
+	'get_queries': get_queries,
+	'Search': Search
+}
+
