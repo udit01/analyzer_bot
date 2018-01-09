@@ -92,11 +92,11 @@ intents.onDefault((session) => {//for NONE
 });
 
 
-var introMessage = ['I help to find relevant information both current and all-time\n Get results Relevant to academica, general definations and more ',
-    'Deveoped by :-\n Udit Jain, Soumya Sharma, Akshat Khare.'
+var introMessage = ['I help to find relevant information both current and all-time\n\n Get results Relevant to academica, general definations and more ',
+    'Deveoped by :-\n\n Udit Jain, Soumya Sharma, Akshat Khare.'
 ];
 
-var helpMessage = ['This message will contain the usage information how to use.\n Next Line'
+var helpMessage = ['This message will contain the usage information how to use.\n\n Next Line'
     // , 'Another Message.'
 ];
 
@@ -132,7 +132,7 @@ bot.dialog('/exit', [
         // session.sendTyping();
         //check syntax
         if (results.response == true){
-            session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
+            session.send('Thank you! Hope You enjoyed our services! Please come again!\\n Meanwhile you can fill this optional survey to help us serve you better');
             session.send(""+FeedbackFormUrl);
             session.endConversation();
         }
@@ -193,7 +193,7 @@ bot.dialog('/main', [
             console.log("" + e);
         }
 
-        builder.Prompts.choice(session, "What would you like search results about \n<Index Number>?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
+        builder.Prompts.choice(session, "What would you like search results about<Which Index Number>?", "Proper Noun<Entities>|Current info<News>|People also search for <Recommendations/Similar>|Scientific Domain <Academica>|Term-Definition <Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
@@ -207,7 +207,7 @@ bot.dialog('/main', [
         
         session.sendTyping();
         
-        session.send("You selected option:"+session.conversationData.mainPrompt);
+        session.send("You selected option:"+session.conversationData.mainPrompt.text);
         
         if (args.response) {
             // var intents_in_resp = results.response.intents;
@@ -231,7 +231,7 @@ bot.dialog('/main', [
             // );
 
             switch (args.response.entity) {
-                case "Proper Noun\n<Entities>":
+                case "Proper Noun <Entities>":
                     //term to info
 
                     //call a JS in the source here
@@ -244,7 +244,7 @@ bot.dialog('/main', [
                     //call the proper noun dialogue with session.begin
                     session.beginDialog('/properNoun');//With what data ?
                     break;
-                case "Current info\n<News>":
+                case "Current info <News>":
 
                     //News API, terms  
 
@@ -252,7 +252,7 @@ bot.dialog('/main', [
                     session.send("Current info case detected");  
                     session.beginDialog('/current');                  
                     break;
-                case "People also search for\n<Recommendations/Similar>":
+                case "People also search for <Recommendations/Similar>":
 
                     //bing search recommnedation api 
 
@@ -260,7 +260,7 @@ bot.dialog('/main', [
                     session.send("People also search for case detected");
                     session.beginDialog('/similar');                                      
                     break;
-                case "Scientific Domain\n<Academica>":
+                case "Scientific Domain <Academica>":
                     
                     //academic api
                     
@@ -268,7 +268,7 @@ bot.dialog('/main', [
                     session.send("Scientific domain case detected");
                     session.beginDialog('/acad');                                      
                     break;
-                case "Term-Defination\n<Meaning>":
+                case "Term-Defination <Meaning>":
                     //call a JS in the source here//and the displayer
                     //oxford api
                     //do something dictionary meaning ?
@@ -321,26 +321,32 @@ bot.dialog('/main', [
 bot.dialog('/properNoun', [
     function (session, args, next) {
         //generic callback
+        session.send('In proper noun dialogue.');
         
-        function callbackTerms2Info(word,jsonData) {//this is by call back function from which i want a promise to be returned
-
-            session.send("Your word was:" + word + " .\n Related information is: " + jsonData);
+        function callbackTerms2Info(jsonData,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
+            if (stringCode == "success"){
+                session.send("Your keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
+            }
+            else{
+                // session.send("Your word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
+            }
             // resolveTrue = true;
         }
+        for(i in session.conversationData.terms){    
 
-        for(word in session.conversationData.terms){         
-                try {
-                    // var resolveTrue = false
-                    t2i.get_terms(word, callbackTerms2Info );
-                }
-                catch (e) {
-                    console.log("" + e);
-                }
+            try {
+                // var resolveTrue = false
+                t2i.get_info(session.conversationData.terms[i], callbackTerms2Info );
+            }
+            catch (e) {
+                console.log("" + e);
+            }
         }
+        next();
     },
     function (session, results) {
-        session.send("Proper Noun dialogue has ended but wait for API call to finish!")
-        session.endDialog();
+        session.send("Proper Noun dialogue has ended but wait for API call to finish!");
+        session.endDialog(session);
     }
 ]);
 
