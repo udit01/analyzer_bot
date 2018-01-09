@@ -79,7 +79,7 @@ intents.matches('Greeting', '/greeting');
 intents.matches('Help', '/help');
 intents.matches('Exit', '/exit');
 // intents.matches('More', '/more');//difficult ?
-intents.matches('None', '/main')
+intents.matches('None', '/main');
 // intents.matches('Main', '/main');
 // intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
 
@@ -104,7 +104,7 @@ bot.dialog('/greeting', [
     // },
     function (session, args,next) {
         // session.send('Hello there! I am analyzer bot and send the para you want to analyze');
-        builder.Prompts.text(session, 'Hello there! I am analyzer bot and text the para you want to analyze.')
+        builder.Prompts.text(session, 'Hello there! I am analyzer bot and text the para you want to analyze.');
     
     },
     function(session,results){
@@ -257,17 +257,21 @@ bot.dialog('/main', [
                 case "Current info <News>":
 
                     //News API, terms  
-
-                    //call a JS in the source here
                     session.send("Current info case detected");  
+                    while (!session.conversationData.boolTermsAPI) {
+                        //waiting for being true
+                    }
                     session.beginDialog('/current');                  
                     break;
                 case "People also search for <Recommendations/Similar>":
 
                     //bing search recommnedation api 
-                    
-                    //call a JS in the source here
                     session.send("People also search for case detected");
+                    
+                    while (!session.conversationData.boolTermsAPI) {
+                        //waiting for being true
+                    }
+                    
                     session.beginDialog('/similar');                                      
                     break;
                 case "Scientific Domain <Academica>":
@@ -277,9 +281,7 @@ bot.dialog('/main', [
                     while (!session.conversationData.boolTermsAPI) {
                         //waiting for being true
                     }
-                    //call a JS in the source here
                     session.beginDialog('/acad');                                      
-                    
                     break;
                 case "Term-Defination <Meaning>":
                     //call a JS in the source here//and the displayer
@@ -287,13 +289,17 @@ bot.dialog('/main', [
                     //do something dictionary meaning ?
 
                     session.send("Term defination case detected");
+                    while (!session.conversationData.boolTermsAPI) {
+                        //waiting for being true
+                    }
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
-
-                    //write Explicit JS code for this
-
+                
                     session.send("External search engine links requested");
+                    while (!session.conversationData.boolTermsAPI) {
+                        //waiting for being true
+                    }
                     session.beginDialog('/more');
                 case "Help":
                     //do i want the help dialogue to return here ?
@@ -315,7 +321,7 @@ bot.dialog('/main', [
     },
     function (session, args,next) {
         // The menu runs a loop until the user chooses to (quit).
-        builder.Prompts.confirm(session,"Do you want some more external links to the common search enginers ? ")
+        builder.Prompts.confirm(session,"Do you want some more external links to the common search enginers ? ");
     },
     function (session, results) {
         // The menu runs a loop until the user chooses to (quit).
@@ -336,9 +342,9 @@ bot.dialog('/properNoun', [
         //generic callback
         session.send('In proper noun dialogue.');
         
-        function callbackTerms2Info(jsonData,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
+        function callbackTerms2Info(jsonDataNoun,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success"){
-                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
+                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
             }
             else{
                 // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
@@ -368,9 +374,9 @@ bot.dialog('/current', [
         session.send('In current news dialogue.');
         
 
-        function callbackNewsWords(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+        function callbackNewsWords(jsonArrNewsWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonData);
+                session.send("The key word was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonArrNewsWords);
             }
             else {
                 session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
@@ -378,9 +384,9 @@ bot.dialog('/current', [
             }
         }
 
-        function callbackNews(jsonarr, oquery, stringCode) {
+        function callbackNews(jsonArrNews, oquery, stringCode) {
             if (stringCode == "success") {
-                session.send("The original query was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonData);
+                session.send("The original query was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonArrNews);
             }
             else {
                 session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
@@ -388,7 +394,7 @@ bot.dialog('/current', [
 
                     try {
                         // var resolveTrue = false
-                        bns.getRelatedData(session.conversationData.terms[i], callbackNewsWords);
+                        bns.getNewsData(session.conversationData.terms[i], callbackNewsWords);
                     }
                     catch (e) {
                         console.log("" + e);
@@ -400,7 +406,7 @@ bot.dialog('/current', [
 
 
         try {
-            bns.get_terms(session.conversationData.mainEntry, callbackNews );
+            bns.getNewsData(session.conversationData.mainEntry, callbackNews );
         }
         catch (e) {
             console.log("" + e);
@@ -419,9 +425,9 @@ bot.dialog('/similar', [
         //call some API in the src directory with the conversation data you have
         session.send('In similar dialogue.');
         
-        function callbackSimilarWords(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+        function callbackSimilarWords(jsonDataSimilarWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonData);
+                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonDataSimilarWords);
             }
             else {
                 session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by Bing RecommededSearchAPI. ");
@@ -429,9 +435,9 @@ bot.dialog('/similar', [
             }
         }
         
-        function callbackSimilar(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+        function callbackSimilar(jsonDataSimilar, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The original query was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonData);
+                session.send("The original query was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonDataSimilar);
             }
             else {
                 session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by Bing RecommededSearchAPI.\n\nNow searching for indivisual key words. ");
@@ -477,11 +483,11 @@ bot.dialog('/similar', [
 bot.dialog('/acad', [
     function (session, args, next) {
         session.send("In Academic dialogue");
-        
-        function callbackTerms2Acad(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+        //you can search for whole in the acad
+        function callbackTerms2Acad(jsonDataAcad, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             
             if (stringCode == "success") {
-                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
+                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataAcad);
             }
             else {
                 // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
@@ -501,7 +507,7 @@ bot.dialog('/acad', [
         next();
     },
     function (session, results) {
-        session.send("End of Academic dialogue but wait for the API call to finish");
+        session.send("End of Academic dialogue but wait for the API call to finish.");
         session.endDialog();
     }
 ]);

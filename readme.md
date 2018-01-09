@@ -35,3 +35,6 @@ If you have setup continuous integration, then your bot will automatically deplo
 9. Prevent main recursion.
 10. Prevent Acad from doing it's thing
 11. Rich text 
+12. Trigger events on exit help etc.
+13. Write the more dialogue
+14. Pass through spell checker first before calling any APIS

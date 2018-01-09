@@ -38,10 +38,10 @@ let response_handler = function (response) {
 			body_ = body_.queryContext;
 		}
         let body__ = JSON.stringify (body_, null, '  ');
-        console.log (body__);
+        // console.log (body__);
     });
     response.on ('error', function (e) {
-        console.log ('Error: ' + e.message);
+        console.log("" + e);
     });
 };
 

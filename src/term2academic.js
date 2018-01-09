@@ -67,7 +67,7 @@ let Search = function (query, funcThroughGQ) {
 		funcThroughGQ(body__,word,stringCode);
     });
     response.on ('error', function (e) {
-        console.log ('Error: ' + e.message);
+        console.log ("" + e);
     });
 }
 );
@@ -116,7 +116,7 @@ let get_queries = function (inp, funcFromApp) {
         // console.log (body_);
 
 		if (body_[0] != undefined){
-			console.log(body_[0]);
+			// console.log(body_[0]);
 			Search(body_[0], funcFromApp);
 		}
 		else{
@@ -125,7 +125,7 @@ let get_queries = function (inp, funcFromApp) {
 		}			
     });
     response.on ('error', function (e) {
-        console.log ('Error: ' + e.message);
+        console.log ("" + e);
     });
 }
 );
@@ -137,11 +137,11 @@ function qgeneric(inp){
 	var q = "And("
 	var words = inp.split(" ");
 	for (var i in words){
-		console.log(words[i]);
+		// console.log(words[i]);
 		words[i] = "W='"+words[i]+"'";
 	}
 	q = q + words.join(",") + ")";
-	console.log(q);
+	// console.log(q);
 	return q;
 }
 

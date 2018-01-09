@@ -55,7 +55,7 @@ let get_key_phrases = function (documents, func) {
 			func(body__);
 		});
 		response.on ('error', function (e) {
-			console.log ('Error: ' + e.message);
+			console.log("" + e);
 		});
 	});
 

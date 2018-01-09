@@ -1,7 +1,7 @@
 var wordLimit = 15;
 
-var t2t = require('./src/text2terms');
-var t2n = require('./src/text2nouns');
+var t2t = require('./text2terms');
+var t2n = require('./text2nouns');
 
 
 function get_terms_combined(input, callbackTerms){
@@ -14,4 +14,8 @@ function get_terms_combined(input, callbackTerms){
     else{
         t2t.get_terms(input,callbackTerms);          
     }
+}
+
+module.exports = {
+    'get_terms_combined': get_terms_combined
 }
