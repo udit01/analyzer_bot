@@ -28,7 +28,7 @@ let getNewsData=function(inp,func1){
         response.on('end', function () {
             var reqJson = JSON.parse(body);
             var finjson = JSON.stringify(reqJson, null, '  ');
-            console.log(finjson);
+            //console.log(finjson);
             try{
                 var relatedNewsSearchArr = reqJson["value"];
                 var numResults = relatedNewsSearchArr.length;
