@@ -56,8 +56,10 @@ var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 //external sources
 var t2t = require('./src/text2terms');
-var t2s = require('./src/bingSearch');
+// var t2s = require('./src/bingSearch');
 var t2r = require('./src/bingRelatedSearch');
+var t2i = require('./src/term2info');
+var bs = require('./src/bingSearch')
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -92,11 +94,11 @@ intents.onDefault((session) => {//for NONE
 });
 
 
-var introMessage = ['I help to find relevant information both current and all-time\n Get results Relevant to academica, general definations and more ',
-    'Deveoped by :-\n Udit Jain, Soumya Sharma, Akshat Khare.'
+var introMessage = ['I help to find relevant information both current and all-time\n\n Get results Relevant to academica, general definations and more ',
+    'Deveoped by :-\n\n Udit Jain, Soumya Sharma, Akshat Khare.'
 ];
 
-var helpMessage = ['This message will contain the usage information how to use.\n Next Line'
+var helpMessage = ['This message will contain the usage information how to use.\n\n Next Line'
     // , 'Another Message.'
 ];
 
@@ -132,7 +134,7 @@ bot.dialog('/exit', [
         // session.sendTyping();
         //check syntax
         if (results.response == true){
-            session.send('Thank you! Hope You enjoyed our services! Please come again!\n Meanwhile you can fill this optional survey to help us serve you better');
+            session.send('Thank you! Hope You enjoyed our services! Please come again!\\n Meanwhile you can fill this optional survey to help us serve you better');
             session.send(""+FeedbackFormUrl);
             session.endConversation();
         }
@@ -161,7 +163,7 @@ bot.dialog('/help', [
         helpMessage.forEach(function (ms) {
             session.send(ms);
         });
-        session.endDialog(session);
+        session.endDialog();
     }
 ]);
 
@@ -199,12 +201,25 @@ bot.dialog('/main', [
             //         session.send(session.conversationData.relatedsearchedData);
             //     }
             // );
+            session.conversationData.boolTermsAPI = false;
+
+            function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
+                
+                session.conversationData.terms = jsonarr;
+                session.send("Your key words detected by us are :" + session.conversationData.terms);
+                // let termPromise = new Promise();
+                session.conversationData.boolTermsAPI = true;
+            }
+            
+            t2t.get_terms(session.conversationData.mainEntry, callback );
+
+          
         }
         catch (e) {
             console.log("" + e);
         }
 
-        builder.Prompts.choice(session, "What would you like search results about \n<Index Number>?", "Proper Noun\n<Entities>|Current info\n<News>|People also search for\n<Recommendations/Similar>|Scientific Domain\n<Academica>|Term-Defination\n<Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
+        builder.Prompts.choice(session, "What would you like search results about<Which Index Number>?", "Proper Noun <Entities>|Current info <News>|People also search for <Recommendations/Similar>|Scientific Domain <Academica>|Term-Definition <Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
@@ -218,7 +233,7 @@ bot.dialog('/main', [
         
         session.sendTyping();
         
-        session.send("You selected option:"+session.conversationData.mainPrompt);
+        session.send("You selected option:"+session.conversationData.mainPrompt.text);
         
         if (args.response) {
             // var intents_in_resp = results.response.intents;
@@ -230,37 +245,67 @@ bot.dialog('/main', [
             //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
 
             //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
+            session.conversationData.boolBingSearchAPI = false;
             
-            
+            //below is the code to print the searched data
+            // PASS APPENDED KEYWORDS INTO THE BING SEARCH
+            // bs.getData(session.conversationData.mainEntry,
+            //     function(jsondat){
+            //         session.conversationData.searchedData = jsondat;
+            //         session.send(session.conversationData.searchedData);
+            //     }
+            // );
+
             switch (args.response.entity) {
-                case "Proper Noun\n<Entities>":
-                    // session.beginDialog('/events');
+                case "Proper Noun <Entities>":
+                    //term to info
+
                     //call a JS in the source here
                     session.send("Proper Noun case detected");
+
+                    while (!session.conversationData.boolTermsAPI){
+                        //waiting for being true
+                    }
+                    //now begin that dialogue
                     //call the proper noun dialogue with session.begin
                     session.beginDialog('/properNoun');//With what data ?
                     break;
-                case "Current info\n<News>":
+                case "Current info <News>":
+
+                    //News API, terms  
+
                     //call a JS in the source here
                     session.send("Current info case detected");  
                     session.beginDialog('/current');                  
                     break;
-                case "People also search for\n<Recommendations/Similar>":
+                case "People also search for <Recommendations/Similar>":
+
+                    //bing search recommnedation api 
+
                     //call a JS in the source here
                     session.send("People also search for case detected");
                     session.beginDialog('/similar');                                      
                     break;
-                case "Scientific Domain\n<Academica>":
+                case "Scientific Domain <Academica>":
+                    
+                    //academic api
+                    
                     //call a JS in the source here
                     session.send("Scientific domain case detected");
                     session.beginDialog('/acad');                                      
                     break;
-                case "Term-Defination\n<Meaning>":
+                case "Term-Defination <Meaning>":
                     //call a JS in the source here//and the displayer
+                    //oxford api
+                    //do something dictionary meaning ?
+
                     session.send("Term defination case detected");
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
+
+                    //write Explicit JS code for this
+
                     session.send("External search engine links requested");
                     session.beginDialog('/more');
                 case "Help":
@@ -273,7 +318,8 @@ bot.dialog('/main', [
                 // default:
                 //     session.replaceDialog('/more')
                 //PUSH IT INTO A GENERIC SEARCH OR MORE CASE 
-            }
+            }   
+            session.send('You are after the switch case in main');
             // }
         }
         else {
@@ -289,7 +335,7 @@ bot.dialog('/main', [
         // session.conversationData.moreBool = results.response;
         
         //CHECK SYNTAX BELOW
-        if (results.response.text.toUpperCase() == 'YES' ){
+        if (results.response == true ){
             session.replaceDialog('/more');
         }
         session.endDialog();
@@ -300,11 +346,33 @@ bot.dialog('/main', [
 //below dialogue calls the JS and prettifies the output
 bot.dialog('/properNoun', [
     function (session, args, next) {
-        //call some API in the src directory with the conversation data you have
+        //generic callback
+        session.send('In proper noun dialogue.');
+        
+        function callbackTerms2Info(jsonData,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
+            if (stringCode == "success"){
+                session.send("Your keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
+            }
+            else{
+                // session.send("Your word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
+            }
+            // resolveTrue = true;
+        }
+        for(i in session.conversationData.terms){    
+
+            try {
+                // var resolveTrue = false
+                t2i.get_info(session.conversationData.terms[i], callbackTerms2Info );
+            }
+            catch (e) {
+                console.log("" + e);
+            }
+        }
+        next();
     },
     function (session, results) {
-
-        session.endDialog();
+        // session.send("Proper Noun dialogue has ended but wait for API call to finish!");
+        session.endDialog("Proper Noun dialogue has ended but wait for API call to finish!");
     }
 ]);
 
