@@ -48,11 +48,13 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 //external sources
-var t2t = require('./src/text2terms');
-var brs = require('./src/bingRelatedSearch');
+// var t2t = require('./src/text2terms');
+var tc = require('./src/terms_combine');
 var t2i = require('./src/term2info');
 var t2a = require('./src/term2academic');
 var bs = require('./src/bingSearch');
+var brs = require('./src/bingRelatedSearch');
+var bns = require('./src/bingNewsSearch');
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -170,41 +172,28 @@ bot.dialog('/main', [
         session.sendTyping();
         
         try {
-            // uncomment to get back the terms data
-            // t2t.get_terms(session.conversationData.mainEntry,
-            //     function (jsonarr) {
-            //         session.conversationData.terms = jsonarr;
-            //         session.send("The key terms detected by us are :" + session.conversationData.terms);
 
-            // });
-
-
-            //below is the code to print the searched data
-            // t2s.getData(session.conversationData.mainEntry,
-            //     function(jsondat){
-            //         session.conversationData.searchedData = jsondat;
-            //         session.send(session.conversationData.searchedData);
-            //     }
-            // );
-
-            //below is the code for printing the related search data
-            // t2r.getRelatedData(session.conversationData.mainEntry,
-            //     function(jsonrelateddat){
-            //         session.conversationData.relatedsearchedData = jsonrelateddat;
-            //         session.send(session.conversationData.relatedsearchedData);
-            //     }
-            // );
             session.conversationData.boolTermsAPI = false;
+            // uncomment to get back the terms data
+            tc.get_terms_combined(session.conversationData.mainEntry,
+                function (jsonarr) {
+                    session.conversationData.terms = jsonarr;
+                    session.send("The key terms TextAnalytics/Linguistic API are :" + session.conversationData.terms);
 
-            function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
+            });
+
+   
+            // session.conversationData.boolTermsAPI = false;
+
+            // function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
                 
-                session.conversationData.terms = jsonarr;
-                session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
-                // let termPromise = new Promise();
-                session.conversationData.boolTermsAPI = true;
-            }
+            //     session.conversationData.terms = jsonarr;
+            //     session.send("Your key words detected by us are :" + session.conversationData.terms);
+            //     session.conversationData.boolTermsAPI = true;
+            // }
             
-            t2t.get_terms(session.conversationData.mainEntry, callback );
+            // tc.get_terms(session.conversationData.mainEntry, callback );
+
 
           
         }
@@ -238,7 +227,6 @@ bot.dialog('/main', [
             //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
 
             //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
-            session.conversationData.boolBingSearchAPI = false;
             
             //below is the code to print the searched data
             // PASS APPENDED KEYWORDS INTO THE BING SEARCH
@@ -248,6 +236,9 @@ bot.dialog('/main', [
             //         session.send(session.conversationData.searchedData);
             //     }
             // );
+            
+            // session.conversationData.boolBingSearchAPI = false;
+
 
             switch (args.response.entity) {
                 case "Proper Noun <Entities>":
@@ -324,7 +315,7 @@ bot.dialog('/main', [
     },
     function (session, args,next) {
         // The menu runs a loop until the user chooses to (quit).
-        builder.Prompts.confirm("Do you want some more external links to the common search enginers ? ")
+        builder.Prompts.confirm(session,"Do you want some more external links to the common search enginers ? ")
     },
     function (session, results) {
         // The menu runs a loop until the user chooses to (quit).
@@ -368,16 +359,57 @@ bot.dialog('/properNoun', [
     },
     function (session, results) {
         session.send("Proper Noun dialogue has ended but wait for API call to finish!");
-        // session.endDialog("Proper Noun dialogue has ended but wait for API call to finish!");
+        session.endDialog();
     }
 ]);
 
 bot.dialog('/current', [
     function (session, args, next) {
-        //call some API in the src directory with the conversation data you have
+        session.send('In current news dialogue.');
+        
+
+        function callbackNewsWords(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+            if (stringCode == "success") {
+                session.send("The key word was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonData);
+            }
+            else {
+                session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
+
+            }
+        }
+
+        function callbackNews(jsonarr, oquery, stringCode) {
+            if (stringCode == "success") {
+                session.send("The original query was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonData);
+            }
+            else {
+                session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
+                for (i in session.conversationData.terms) {
+
+                    try {
+                        // var resolveTrue = false
+                        bns.getRelatedData(session.conversationData.terms[i], callbackNewsWords);
+                    }
+                    catch (e) {
+                        console.log("" + e);
+                    }
+                }
+
+            }
+        }
+
+
+        try {
+            bns.get_terms(session.conversationData.mainEntry, callbackNews );
+        }
+        catch (e) {
+            console.log("" + e);
+        }
+
+        next();
     },
     function (session, results) {
-
+        session.send("Current Info dialogue has ended but wait for API call to finish!");
         session.endDialog();
     }
 ]);
@@ -386,6 +418,17 @@ bot.dialog('/similar', [
     function (session, args, next) {
         //call some API in the src directory with the conversation data you have
         session.send('In similar dialogue.');
+        
+        function callbackSimilarWords(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+            if (stringCode == "success") {
+                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonData);
+            }
+            else {
+                session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by Bing RecommededSearchAPI. ");
+
+            }
+        }
+        
         function callbackSimilar(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
                 session.send("The original query was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonData);
@@ -406,15 +449,6 @@ bot.dialog('/similar', [
             }
         }
 
-        function callbackSimilarWords(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
-            if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonData);
-            }
-            else {
-                session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by Bing RecommededSearchAPI. ");
-                
-            }
-        }
         
         try {
             brs.getRelatedData(session.conversationData.mainEntry, callbackSimilar);
@@ -436,7 +470,7 @@ bot.dialog('/similar', [
     },
     function (session, results) {
         session.send("Similar dialogue has ended but wait for API call to finish!");
-        // session.endDialog();
+        session.endDialog();
     }
 ]);
 
@@ -467,8 +501,8 @@ bot.dialog('/acad', [
         next();
     },
     function (session, results) {
-        session.send("End of Academic dialogue");
-        // session.endDialog();
+        session.send("End of Academic dialogue but wait for the API call to finish");
+        session.endDialog();
     }
 ]);
 

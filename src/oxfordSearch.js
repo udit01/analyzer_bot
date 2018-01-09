@@ -29,8 +29,6 @@ let getNewsData=function(inp,func1){
             var reqJson = JSON.parse(body);
             var finjson = JSON.stringify(reqJson, null, '  ');
             //console.log(finjson);
-            var stringCode = "success";
-
             try{
                 var relatedNewsSearchArr = reqJson["value"];
                 var numResults = relatedNewsSearchArr.length;
@@ -46,12 +44,10 @@ let getNewsData=function(inp,func1){
                     }
                 }
                 console.log("relatedresults being displayed");
+                func1(relatedNewsSearchMessage);
             }catch(e){
-                console.log(""+e);
-                stringCode = "Couldn't find relevant news";
-
+                func1("cant find related searches");
             }
-            func1(relatedNewsSearchMessage,inp,stringCode);
             
         });
         response.on('error', function (e) {

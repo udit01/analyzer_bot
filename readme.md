@@ -30,3 +30,8 @@ If you have setup continuous integration, then your bot will automatically deplo
 4. Typing Indicator
 5. Improve Similar Search by incorporating Web Serch and URL's from it.
 6. Take news from Bing News API and show in a option random news in main.
+7. Write help message 
+8. Beautify all messages
+9. Prevent main recursion.
+10. Prevent Acad from doing it's thing
+11. Rich text 
