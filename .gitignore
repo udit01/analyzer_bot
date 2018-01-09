@@ -1,5 +1,9 @@
 ignore/
 envVar/
+<<<<<<< HEAD
+=======
+src/text2termspre
+>>>>>>> be46ef3fba3857302893b2beb3d0b0fd44682a85
 .vs/
 
 node_modules/

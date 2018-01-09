@@ -1,0 +1,59 @@
+LOGS:
+
+linguistics-
+
+separates sentences into phrases and makes a tree in json at attribute 'result'
+
+analyze-text relies on capitalisations to identify proper nouns. 
+handles exclamations well.
+can't handle non-literal usage eg suppose that.
+has some basic ml
+works for symbols
+
+
+text_analysis
+
+analyses sentiment, key phrases and language from text
+
+sentiment analysis isn't that good, beware of default 0.50 value when sentiment analysis fails
+phrase separation is good
+language analysis identifies only the predominant language
+
+
+Academic Data 
+
+Query syntax can be generated from keyword query by using interpret method or by following query syntax
+This query can be sent to the evaluate method which returns suitable results.
+Similarity scores can be checked between two scientific sentences.
+
+functionality works fine. Can be used for finding research papers, journals, authors from keywords; compare 
+work or sentences scientifically, write own queries for flexibility
+can't handle misspelling of scientists or technical terms.
+
+
+Decisions API
+
+Provides ranking of links according to previous history of user
+
+works only with RSS or Atom feeds, so perhaps useless for us.
+
+
+Entity Recognition
+
+Provides selection of phrases which represent entities.
+
+Relies on capitalisation and structure of words. Can tolerate slight misspelling, if 
+result is still a proper word. Matches unrelated terms as well if capitalised or otherwise highlighted.
+can handle reference text nicely.
+
+
+knowledge exporation service
+
+downloadable for free trial, can't test but enables definition of a grammar/schema for mapping search 
+queries with query type to compose queries and later use knowledge graph with generated query.
+
+
+
+
+
+
