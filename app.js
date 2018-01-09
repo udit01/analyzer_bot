@@ -161,7 +161,7 @@ bot.dialog('/help', [
         helpMessage.forEach(function (ms) {
             session.send(ms);
         });
-        session.endDialog(session);
+        session.endDialog();
     }
 ]);
 
@@ -193,7 +193,7 @@ bot.dialog('/main', [
             console.log("" + e);
         }
 
-        builder.Prompts.choice(session, "What would you like search results about<Which Index Number>?", "Proper Noun<Entities>|Current info<News>|People also search for <Recommendations/Similar>|Scientific Domain <Academica>|Term-Definition <Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
+        builder.Prompts.choice(session, "What would you like search results about<Which Index Number>?", "Proper Noun <Entities>|Current info <News>|People also search for <Recommendations/Similar>|Scientific Domain <Academica>|Term-Definition <Meaning>|External Search Engine(s) Links|Help|Exit", { listStyle : builder.ListStyle.auto});
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
@@ -219,7 +219,7 @@ bot.dialog('/main', [
             //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
 
             //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
-            session.conversationData.boolSearchAPI = false;
+            session.conversationData.boolBingSearchAPI = false;
             
             //below is the code to print the searched data
             // PASS APPENDED KEYWORDS INTO THE BING SEARCH
@@ -345,8 +345,8 @@ bot.dialog('/properNoun', [
         next();
     },
     function (session, results) {
-        session.send("Proper Noun dialogue has ended but wait for API call to finish!");
-        session.endDialog(session);
+        // session.send("Proper Noun dialogue has ended but wait for API call to finish!");
+        session.endDialog("Proper Noun dialogue has ended but wait for API call to finish!");
     }
 ]);
 
