@@ -74,7 +74,7 @@ let entity_search = function (args, func) {
         });
 
         response.on ('error', function (e) {
-            console.log ('Error: ' + e.message);
+            console.log (""+e);
         });
     });
     req.end ();

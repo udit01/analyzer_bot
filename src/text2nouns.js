@@ -45,7 +45,7 @@ let get_nouns = function (inp, func) {
 		func(body_);
     });
     response.on ('error', function (e) {
-        console.log ('Error: ' + e.message);
+        console.log (""+ e);
     });
 });
 	req.write(JSON.stringify(body));

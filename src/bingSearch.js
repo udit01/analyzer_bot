@@ -7,7 +7,7 @@ let path = '/bing/v7.0/search';
 
 let getData=function(inp,func1){
     
-    console.log('Searching the Web for: ' + inp);
+    // console.log('Searching the Web for: ' + inp);
     let request_params = {
         method: 'GET',
         hostname: host,
@@ -30,16 +30,16 @@ let getData=function(inp,func1){
             //     func1(reqJson["entities"]["value"][0]["description"]);
             // }
             try{
-                console.log("trying entitysearch");
+                // console.log("trying entitysearch");
                 var entityMessage = reqJson["entities"]["value"][0]["description"]+ "\n\n"+reqJson["entities"]["value"][0]["name"]+"\n\n"+reqJson["entities"]["value"][0]["url"];
-                console.log("entitymesssage being displayed");
+                // console.log("entitymesssage being displayed");
                 func1(entityMessage);
             }catch(TypeError){
                 try{
                     //var alternateMessage="";
                     var alternateMessage = reqJson["webPages"]["value"][0]["snippet"] + "\n\n"+reqJson["webPages"]["value"][0]["name"]+"\n\n"+reqJson["webPages"]["value"][0]["url"];
                     //alter
-                    console.log("alternatemessage being displayed");
+                    // console.log("alternatemessage being displayed");
                     func1(alternateMessage);
                 }catch(e){
                     func1("no result found");
@@ -49,7 +49,7 @@ let getData=function(inp,func1){
             
         });
         response.on('error', function (e) {
-            console.log('Error: ' + e.message);
+            console.log(""+ e);
         });
 
     });
