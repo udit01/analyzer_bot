@@ -61,6 +61,7 @@ var t2r = require('./src/bingRelatedSearch');
 var t2i = require('./src/term2info');
 var t2a = require('./src/term2academic');
 var bs = require('./src/bingSearch');
+var t2n = require('./src/bingNewsSearch');
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -202,17 +203,34 @@ bot.dialog('/main', [
             //         session.send(session.conversationData.relatedsearchedData);
             //     }
             // );
+
+            //uncomment when done debugging news or .js files made afterwards
+            // session.conversationData.boolTermsAPI = false;
+
+            // function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
+                
+            //     session.conversationData.terms = jsonarr;
+            //     session.send("Your key words detected by us are :" + session.conversationData.terms);
+            //     // let termPromise = new Promise();
+            //     session.conversationData.boolTermsAPI = true;
+            // }
+            
+            // t2t.get_terms(session.conversationData.mainEntry, callback );
+
+            //below code was written to test the src files while not messing with the version of Udit
+
             session.conversationData.boolTermsAPI = false;
 
-            function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
+            function callback(jsondata) {//this is by call back function from which i want a promise to be returned
                 
-                session.conversationData.terms = jsonarr;
-                session.send("Your key words detected by us are :" + session.conversationData.terms);
+                session.conversationData.news = jsondata;
+                session.send(session.conversationData.news);
                 // let termPromise = new Promise();
                 session.conversationData.boolTermsAPI = true;
             }
             
-            t2t.get_terms(session.conversationData.mainEntry, callback );
+            t2n.getNewsData(session.conversationData.mainEntry, callback );
+
 
           
         }
