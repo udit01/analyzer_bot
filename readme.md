@@ -23,5 +23,10 @@ npm run azure-publish
 
 If you have setup continuous integration, then your bot will automatically deployed when new changes are pushed to the source repository.
 
-
-
+###To Do List
+1. Proactive messages
+2. Rich cards
+3. Input Hints
+4. Typing Indicator
+5. Improve Similar Search by incorporating Web Serch and URL's from it.
+6. Take news from Bing News API and show in a option random news in main.
