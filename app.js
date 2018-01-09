@@ -57,6 +57,7 @@ var FeedbackFormUrl = process.env.FeedbackFormURL;
 //external sources
 var t2t = require('./src/text2terms');
 var t2i = require('./src/term2info');
+var bs = require('./src/bingSearch')
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -174,17 +175,19 @@ bot.dialog('/main', [
         session.sendTyping();
         
         try {
-            var resolveTrue = false;
+            session.conversationData.boolTermsAPI = false;
 
             function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
                 
                 session.conversationData.terms = jsonarr;
                 session.send("Your key words detected by us are :" + session.conversationData.terms);
                 // let termPromise = new Promise();
-                resolveTrue = true;
+                session.conversationData.boolTermsAPI = true;
             }
             
             t2t.get_terms(session.conversationData.mainEntry, callback );
+
+          
         }
         catch (e) {
             console.log("" + e);
@@ -216,8 +219,17 @@ bot.dialog('/main', [
             //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
 
             //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
+            session.conversationData.boolSearchAPI = false;
             
-            
+            //below is the code to print the searched data
+            // PASS APPENDED KEYWORDS INTO THE BING SEARCH
+            // bs.getData(session.conversationData.mainEntry,
+            //     function(jsondat){
+            //         session.conversationData.searchedData = jsondat;
+            //         session.send(session.conversationData.searchedData);
+            //     }
+            // );
+
             switch (args.response.entity) {
                 case "Proper Noun\n<Entities>":
                     //term to info
@@ -225,7 +237,7 @@ bot.dialog('/main', [
                     //call a JS in the source here
                     session.send("Proper Noun case detected");
 
-                    while(!resolveTrue){
+                    while (!session.conversationData.boolTermsAPI){
                         //waiting for being true
                     }
                     //now begin that dialogue
@@ -280,7 +292,8 @@ bot.dialog('/main', [
                 // default:
                 //     session.replaceDialog('/more')
                 //PUSH IT INTO A GENERIC SEARCH OR MORE CASE 
-            }
+            }   
+            session.send('You are after the switch case in main');
             // }
         }
         else {
@@ -296,7 +309,7 @@ bot.dialog('/main', [
         // session.conversationData.moreBool = results.response;
         
         //CHECK SYNTAX BELOW
-        if (results.response.text.toUpperCase() == 'YES' ){
+        if (results.response == true ){
             session.replaceDialog('/more');
         }
         session.endDialog();
@@ -318,7 +331,7 @@ bot.dialog('/properNoun', [
         for(word in session.conversationData.terms){         
                 try {
                     // var resolveTrue = false
-                    t2i.get_terms(session.conversationData.mainEntry, callback);
+                    t2i.get_terms(word, callbackTerms2Info );
                 }
                 catch (e) {
                     console.log("" + e);
@@ -326,7 +339,7 @@ bot.dialog('/properNoun', [
         }
     },
     function (session, results) {
-        session.send("Proper Noun dialogue has ended but wait!")
+        session.send("Proper Noun dialogue has ended but wait for API call to finish!")
         session.endDialog();
     }
 ]);
