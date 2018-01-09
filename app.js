@@ -54,6 +54,7 @@ var t2i = require('./src/term2info');
 var t2a = require('./src/term2academic');
 var bs = require('./src/bingSearch');
 var t2n = require('./src/bingNewsSearch');
+var t2m = require('./src/oxfordSearch');
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -215,15 +216,15 @@ bot.dialog('/main', [
 
             function callback(jsondata) {//this is by call back function from which i want a promise to be returned
                 
-                session.conversationData.news = jsondata;
-                session.send(session.conversationData.news);
+                session.conversationData.meaning = jsondata;
+                session.send(session.conversationData.meaning);
                 // session.conversationData.terms = jsonarr;
                 // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
                 // let termPromise = new Promise();
                 session.conversationData.boolTermsAPI = true;
             }
             
-            t2n.getNewsData(session.conversationData.mainEntry, callback );
+            t2m.getOxfordData(session.conversationData.mainEntry, callback );
 
 
           

@@ -2,52 +2,78 @@
 'use strict';
 
 let https = require('https');
-let subscriptionKey = process.env.BingSearchAPIKey;
-let host = 'api.cognitive.microsoft.com';
-let path = '/bing/v7.0/news/search';
+let app_id = process.env.OXFORDAPPID;
+let app_key = process.env.OXFORDAPPKEY;
+//let subscriptionKey = process.env.BingSearchAPIKey;
+//let host = 'od-api.oxforddictionaries.com/api/v1';
+let path = '/api/v1/entries/en';
 
 //set the max number of results
-var maxresults=10;
+//var maxresults=10;
 
-let getNewsData=function(inp,func1){
+let getOxfordData=function(inp,func1){
     
-    console.log('Searching news searches the Web for: ' + inp);
+    console.log('Searching oxford searches the Web for: ' + inp);
     let request_params = {
         method: 'GET',
-        hostname: host,
-        path: path + '?q=' + encodeURIComponent(inp),
+        hostname: "od-api.oxforddictionaries.com",
+        path: path +'/'+ encodeURI(inp),
         headers: {
-            'Ocp-Apim-Subscription-Key': subscriptionKey,
+            "Accept": "application/json",
+            "app_id": app_id,
+            "app_key": app_key
         }
     };
+    console.log("lets see");
     let req = https.request(request_params, function(response){
         let body = '';
+        console.log("dekho bhai");
         response.on('data', function (d) {
             body += d;
         });
         response.on('end', function () {
             var reqJson = JSON.parse(body);
             var finjson = JSON.stringify(reqJson, null, '  ');
-            //console.log(finjson);
-            try{
-                var relatedNewsSearchArr = reqJson["value"];
-                var numResults = relatedNewsSearchArr.length;
-                console.log(numResults);
-                var relatedNewsSearchMessage = '';
-                console.log('was executed');
-                for(var i=0;i<numResults && i<=maxresults;i++){
-                    console.log(i);
-                    try{
-                        relatedNewsSearchMessage += relatedNewsSearchArr[i]["name"]+" " +relatedNewsSearchArr[i]["url"]+"\n\n"+relatedNewsSearchArr[i]["description"]+"\n\n"+"Provider: "+relatedNewsSearchArr[i]["provider"][0]["name"]+ "\n\n"+"---------------------"+ "\n\n";
-                    }catch(e){
-                        relatedNewsSearchMessage += relatedNewsSearchArr[i]["name"]+" " +relatedNewsSearchArr[i]["url"]+"\n\n"+relatedNewsSearchArr[i]["description"]+"\n\n";
+            console.log(finjson);
+            var lexicalentries = reqJson["results"][0]["lexicalEntries"];
+            var lengthlexicalentries = lexicalentries.length;
+            var findata = "";
+            for(var i=0;i<lengthlexicalentries;i++){
+                var lexicalcategory = lexicalentries[i]["lexicalCategory"];
+                findata += "Lexical Category: "  + lexicalcategory+ "\n\n";
+                console.log("lexcat was "+i);
+                var entries = lexicalentries[i]["entries"];
+                var numentries = entries.length;
+                var numdef =0;
+                for(var j=0;j<numentries;j++){
+                    var thisentry = entries[j];
+                    var sensesarr = thisentry["senses"];
+                    var numsenses = sensesarr.length;
+                    
+                    for(var k=0;k<numsenses;k++){
+                        var thissense = sensesarr[k];
+                        try{
+                            var definition = thissense["definitions"][0];
+                            numdef++;
+                            findata += "Definition "+numdef+": "+definition +"\n\n";
+                            try{
+                                var examples= thissense["examples"][0]["text"];
+                                findata += "Example: "+ examples + "\n\n";
+                            }catch(e){
+                                console.log("cant find example");
+                                findata += "\n";
+                            }
+                        }catch(e){
+                            console.log("defintion found for this one");
+                        }
+                        
+                        
                     }
                 }
-                console.log("relatedresults being displayed");
-                func1(relatedNewsSearchMessage);
-            }catch(e){
-                func1("cant find related searches");
+                findata+= "----------------------"+"\n\n";
             }
+
+            func1(findata);
             
         });
         response.on('error', function (e) {
@@ -59,11 +85,11 @@ let getNewsData=function(inp,func1){
     req.end();
 }
 module.exports = {
-    'getNewsData' : getNewsData
+    'getOxfordData' : getOxfordData
 }
 
 //made for debugging
-// getNewsData("golden globes",
-//     function(enddat){
-//         console.log(enddat);
-//     }); 
+getOxfordData("set",
+    function(enddat){
+        console.log(enddat);
+    }); 
