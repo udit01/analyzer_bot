@@ -282,7 +282,7 @@ bot.dialog('/main', [
                 case "People also search for <Recommendations/Similar>":
 
                     //bing search recommnedation api 
-
+                    
                     //call a JS in the source here
                     session.send("People also search for case detected");
                     session.beginDialog('/similar');                                      
