@@ -52,7 +52,6 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
 //CUSTOM ENV VARIABLES:
 var FeedbackFormUrl = process.env.FeedbackFormURL;
-// var TextAnalyticsAPIKey = process.env.TextAnalyticsAPIKey;
 
 //external sources
 var t2t = require('./src/text2terms');
