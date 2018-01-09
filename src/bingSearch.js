@@ -26,7 +26,7 @@ let getData=function(inp,func1){
             var reqJson = JSON.parse(body);
             body = JSON.stringify(reqJson, null, '  ');
             console.log(body);
-            if()
+            
             func1(reqJson["entities"]["value"][0]["description"]);
         });
         response.on('error', function (e) {
