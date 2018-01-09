@@ -17,8 +17,11 @@ let path = '/bing/v7.0/entities';
 let mkt = 'en-US';
 let q = 'server';
 
+let word = "Default in term2info.js";
+
 let get_info = function (inp, func1) {
-	let params = '?mkt=' + mkt + '&q=' + encodeURI(inp);
+    let params = '?mkt=' + mkt + '&q=' + encodeURI(inp);
+    word = inp;
 	return entity_search(params, func1);
 }
 
@@ -58,7 +61,7 @@ let entity_search = function (args, func) {
             //cleaning up data from json & handling exceptions here.		
             
             console.log (body__);
-            func(body__);
+            func(word,body__);
         });
 
         response.on ('error', function (e) {

@@ -56,6 +56,7 @@ var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 //external sources
 var t2t = require('./src/text2terms');
+var t2i = require('./src/term2info');
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -173,12 +174,17 @@ bot.dialog('/main', [
         session.sendTyping();
         
         try {
-            t2t.get_terms(session.conversationData.mainEntry,
-                function (jsonarr) {
-                    session.conversationData.terms = jsonarr;
-                    session.send("Your key terms detected by us are :" + session.conversationData.terms);
+            var resolveTrue = false;
 
-                });
+            function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
+                
+                session.conversationData.terms = jsonarr;
+                session.send("Your key words detected by us are :" + session.conversationData.terms);
+                // let termPromise = new Promise();
+                resolveTrue = true;
+            }
+            
+            t2t.get_terms(session.conversationData.mainEntry, callback );
         }
         catch (e) {
             console.log("" + e);
@@ -214,33 +220,54 @@ bot.dialog('/main', [
             
             switch (args.response.entity) {
                 case "Proper Noun\n<Entities>":
-                    // session.beginDialog('/events');
+                    //term to info
+
                     //call a JS in the source here
                     session.send("Proper Noun case detected");
+
+                    while(!resolveTrue){
+                        //waiting for being true
+                    }
+                    //now begin that dialogue
                     //call the proper noun dialogue with session.begin
                     session.beginDialog('/properNoun');//With what data ?
                     break;
                 case "Current info\n<News>":
+
+                    //News API, terms  
+
                     //call a JS in the source here
                     session.send("Current info case detected");  
                     session.beginDialog('/current');                  
                     break;
                 case "People also search for\n<Recommendations/Similar>":
+
+                    //bing search recommnedation api 
+
                     //call a JS in the source here
                     session.send("People also search for case detected");
                     session.beginDialog('/similar');                                      
                     break;
                 case "Scientific Domain\n<Academica>":
+                    
+                    //academic api
+                    
                     //call a JS in the source here
                     session.send("Scientific domain case detected");
                     session.beginDialog('/acad');                                      
                     break;
                 case "Term-Defination\n<Meaning>":
                     //call a JS in the source here//and the displayer
+                    //oxford api
+                    //do something dictionary meaning ?
+
                     session.send("Term defination case detected");
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
+
+                    //write Explicit JS code for this
+
                     session.send("External search engine links requested");
                     session.beginDialog('/more');
                 case "Help":
@@ -280,10 +307,26 @@ bot.dialog('/main', [
 //below dialogue calls the JS and prettifies the output
 bot.dialog('/properNoun', [
     function (session, args, next) {
-        //call some API in the src directory with the conversation data you have
+        //generic callback
+        
+        function callbackTerms2Info(word,jsonData) {//this is by call back function from which i want a promise to be returned
+
+            session.send("Your word was:" + word + " .\n Related information is: " + jsonData);
+            // resolveTrue = true;
+        }
+
+        for(word in session.conversationData.terms){         
+                try {
+                    // var resolveTrue = false
+                    t2i.get_terms(session.conversationData.mainEntry, callback);
+                }
+                catch (e) {
+                    console.log("" + e);
+                }
+        }
     },
     function (session, results) {
-
+        session.send("Proper Noun dialogue has ended but wait!")
         session.endDialog();
     }
 ]);
