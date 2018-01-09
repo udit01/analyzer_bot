@@ -56,6 +56,7 @@ var FeedbackFormUrl = process.env.FeedbackFormURL;
 
 //external sources
 var t2t = require('./src/text2terms');
+var t2s = require('./src/bingSearch')
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -173,12 +174,22 @@ bot.dialog('/main', [
         session.sendTyping();
         
         try {
-            t2t.get_terms(session.conversationData.mainEntry,
-                function (jsonarr) {
-                    session.conversationData.terms = jsonarr;
-                    session.send("Your key terms detected by us are :" + session.conversationData.terms);
+            // uncomment to get back the terms data
+            // t2t.get_terms(session.conversationData.mainEntry,
+            //     function (jsonarr) {
+            //         session.conversationData.terms = jsonarr;
+            //         session.send("Your key terms detected by us are :" + session.conversationData.terms);
 
-                });
+            // });
+
+            
+            //below is the code to print the searched data
+            t2s.getData(session.conversationData.mainEntry,
+                function(jsondat){
+                    session.conversationData.searchedData = jsondat;
+                    session.send(session.conversationData.searchedData);
+                }
+            );
         }
         catch (e) {
             console.log("" + e);
