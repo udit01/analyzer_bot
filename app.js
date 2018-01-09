@@ -1,9 +1,3 @@
-/*
-    Proactive messages
-    Rich cards
-    Input Hints
-    Typing Indicator
-*/
 
 var restify = require('restify');
 var builder = require('botbuilder');
@@ -52,12 +46,10 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
 //CUSTOM ENV VARIABLES:
 var FeedbackFormUrl = process.env.FeedbackFormURL;
-// var TextAnalyticsAPIKey = process.env.TextAnalyticsAPIKey;
 
 //external sources
 var t2t = require('./src/text2terms');
-// var t2s = require('./src/bingSearch');
-var t2r = require('./src/bingRelatedSearch');
+var brs = require('./src/bingRelatedSearch');
 var t2i = require('./src/term2info');
 var t2a = require('./src/term2academic');
 var bs = require('./src/bingSearch');
@@ -183,7 +175,7 @@ bot.dialog('/main', [
             // t2t.get_terms(session.conversationData.mainEntry,
             //     function (jsonarr) {
             //         session.conversationData.terms = jsonarr;
-            //         session.send("Your key terms detected by us are :" + session.conversationData.terms);
+            //         session.send("The key terms detected by us are :" + session.conversationData.terms);
 
             // });
 
@@ -225,6 +217,8 @@ bot.dialog('/main', [
                 
                 session.conversationData.news = jsondata;
                 session.send(session.conversationData.news);
+                // session.conversationData.terms = jsonarr;
+                // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
                 // let termPromise = new Promise();
                 session.conversationData.boolTermsAPI = true;
             }
@@ -252,7 +246,7 @@ bot.dialog('/main', [
         
         session.sendTyping();
         
-        session.send("You selected option:"+session.conversationData.mainPrompt.text);
+        session.send("You selected option:"+session.conversationData.mainPrompt);
         
         if (args.response) {
             // var intents_in_resp = results.response.intents;
@@ -373,10 +367,10 @@ bot.dialog('/properNoun', [
         
         function callbackTerms2Info(jsonData,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success"){
-                session.send("Your keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
+                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
             }
             else{
-                // session.send("Your word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
+                // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
             // resolveTrue = true;
         }
@@ -411,10 +405,58 @@ bot.dialog('/current', [
 bot.dialog('/similar', [
     function (session, args, next) {
         //call some API in the src directory with the conversation data you have
+        session.send('In similar dialogue.');
+        function callbackSimilar(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+            if (stringCode == "success") {
+                session.send("The original query was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonData);
+            }
+            else {
+                session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by Bing RecommededSearchAPI.\n\nNow searching for indivisual key words. ");
+                for (i in session.conversationData.terms) {
+
+                    try {
+                        // var resolveTrue = false
+                        brs.getRelatedData(session.conversationData.terms[i], callbackSimilarWords);
+                    }
+                    catch (e) {
+                        console.log("" + e);
+                    }
+                }
+                
+            }
+        }
+
+        function callbackSimilarWords(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
+            if (stringCode == "success") {
+                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonData);
+            }
+            else {
+                session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by Bing RecommededSearchAPI. ");
+                
+            }
+        }
+        
+        try {
+            brs.getRelatedData(session.conversationData.mainEntry, callbackSimilar);
+        }
+        catch (e) {
+            console.log("" + e);
+        }
+        // for (i in session.conversationData.terms) {
+
+        //     try {
+        //         // var resolveTrue = false
+        //         brs.getRelatedData(session.conversationData.terms[i], callbackSimilar);
+        //     }
+        //     catch (e) {
+        //         console.log("" + e);
+        //     }
+        // }
+        next();       
     },
     function (session, results) {
-
-        session.endDialog();
+        session.send("Similar dialogue has ended but wait for API call to finish!");
+        // session.endDialog();
     }
 ]);
 
@@ -425,10 +467,10 @@ bot.dialog('/acad', [
         function callbackTerms2Acad(jsonData, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             
             if (stringCode == "success") {
-                session.send("Your keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
+                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonData);
             }
             else {
-                // session.send("Your word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
+                // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
             // resolveTrue = true;
         }
