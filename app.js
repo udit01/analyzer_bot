@@ -231,15 +231,16 @@ bot.dialog('/main', [
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
-    function (session, args, next) {
+    function (session, results, next) {
         
-        session.conversationData.mainPrompt = args.response;//why is this not getting any text ?
+        session.conversationData.mainPrompt = results.response;//why is this not getting any text ?
         
-        session.sendTyping();
+        //session.sendTyping();
         
         //session.send("You selected option:"+session.conversationData.mainPrompt);
-        
-        if (args.response) {
+        console.log("line241------------"+results.response);
+		
+        if (results.response) {
             // var intents_in_resp = results.response.intents;
             // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
             //     session.endDialog("Thanks for using. You can chat again by saying Hi");
@@ -263,10 +264,9 @@ bot.dialog('/main', [
 
             session.conversationData.mainBool = false;
 
-            switch (args.response.entity) {
+            switch (results.response.entity) {
                 case "Proper Noun <Entities>":
                     //term to info
-
                     //call a JS in the source here
                     //session.send("Proper Noun case detected");
 
@@ -336,9 +336,9 @@ bot.dialog('/main', [
             // }
         }
         else {
-            session.endDialog("Invalid Response. You can start again by texting the paragraph you want to analyze.\n\nWe'll automatically extract the keywords");
+            session.endDialog();
         }
-        next();
+        //next();
     },
     function (session, args,next) {
         // The menu runs a loop until the user chooses to (quit).
@@ -618,22 +618,29 @@ bot.dialog('/acad', [
 bot.dialog('/meaning', [
     function (session, args, next) {
 
-        session.send("You are in the meaning dialogue");
+        //session.send("You are in the meaning dialogue");
 
         function callbackOxfordAPI(resultOxfordAPI,origWord,stringCode) {//this is by call back function from which i want a promise to be returned
             if(stringCode == "success"){
-                session.send("Your word was : "+ origWord + ".\n\nResults found by Oxford API are : \n\n"+resultOxfordAPI);
+                //session.send("Your word was : "+ origWord + ".\n\nResults found by Oxford API are : \n\n"+resultOxfordAPI);
             }
             else{
-                session.send("Your word was : " + origWord + ".\n\nNo results found by Oxford API. Error String : \n\n" + stringCode);
+                //session.send("Your word was : " + origWord + ".\n\nNo results found by Oxford API. Error String : \n\n" + stringCode);
             }
         }
-
-        for (i in session.conversationData.terms) {
+		
+		var listWord = [];
+		
+		
+        for (j in session.conversationData.terms) {
+			listWord.concat(session.conversationData.terms[j].split(" "));
+        }
+		
+        for (i in listWord) {
 
             try {
                 // var resolveTrue = false
-                oxf.get_meaning(session.conversationData.terms[i], callbackOxfordAPI);
+                oxf.get_meaning(listWord[i], callbackOxfordAPI);
             }
             catch (e) {
                 console.log("" + e);
@@ -641,7 +648,7 @@ bot.dialog('/meaning', [
         }
     },
     function (session, results) {
-        session.send("Meaning Dialogue has ended but wait for the API call to finish and fetch results");
+        //session.send("Meaning Dialogue has ended but wait for the API call to finish and fetch results");
         session.endDialog();
     }
 ]);
