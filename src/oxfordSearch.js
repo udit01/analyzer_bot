@@ -33,20 +33,14 @@ let get_meaning = function (inp, func1) {
         response.on('end', function () {
             try{
                 var reqJson = JSON.parse(body);
-            }
-            catch(e){
-                console.log(""+e);
-            }
-            var rootWord = "";
-            //extract the keyword here 
-            // [0] because all are arrays
-            var lexEntryVal = reqJson['results'][0]['lexicalEntries'][0];
-            // console.log(JSON.stringify(reqJson));
-            // console.log("Line 44:" +JSON.stringify(reqJson['results']));
-
-            try{
-                rootWord = lexEntryVal['inflectionOf'][0]['id'] ;
-                //or can use 'word'
+				var rootWord = "";
+				//extract the keyword here 
+				// [0] because all are arrays
+				var lexEntryVal = reqJson['results'][0]['lexicalEntries'][0];
+				// console.log(JSON.stringify(reqJson));
+				// console.log("Line 44:" +JSON.stringify(reqJson['results']));
+				rootWord = lexEntryVal['inflectionOf'][0]['id'] ;
+					//or can use 'word'
             }
             catch(e){
                 rootWord = inp;
@@ -133,7 +127,7 @@ let getOxfordData=function(inp,funcThoughRoot){
                             
                         }
                     }
-                    findata+= "----------------------"+"\n\n";
+                    //findata+= "----------------------"+"\n\n";
                 }
             }
             catch(e){
