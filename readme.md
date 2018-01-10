@@ -1,3 +1,36 @@
+## Connect
+### Outline
+This bot made by us is an amazing interactive bot compatible with all platforms availible online.
+It has many features like it searches the web for terms or paragraph or image
+It is the most comprehensive bot availible having the most availible features of the 
+various usefule API endpoints availible publicly online, most of them developed by TechnoGiant Microsoft
+#### Terms
+It searches for proper noun, new related to that topic, definition given by bing, 
+definition given by oxford and the vast knowledge availible to us via Knowledge api
+#### Paragraph
+It goes through any paragraph provided and thus gives the most relevant terms and articles which 
+has a significant probability that the user wants to search for. Following this user searches for 
+the term he wanted to search
+#### Image
+Given any url having any image (ofcourse having suitable formats), our bot gives the text in that image.
+Interesting huh? This has been possible due to OCR feature of Computer Vision Api.
+It is of very great help if you are going through a newspaper for instance, and come across an article which
+needs to be looked upon, just click the image and give the public image url to our bot and it will do
+the searching for you. Thus saving time to type the whole text for search.
+
+### APIS used
+Microsoft Bing Search Api
+Microsoft Bing Entity Search Api
+Microsoft Bing Academic Knowledge Api
+Microsoft Bing Computer Vision Api
+Oxford Search Api
+Microsoft Text Analytics Api
+Microsoft Linguistics Api
+
+
+
+
+
 ## Use Azure app service editor
 
 1. make code change in the online editor

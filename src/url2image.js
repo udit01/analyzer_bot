@@ -102,7 +102,7 @@ module.exports = {
 		'getImageData' : getImageData
 }
 
-getImageData("http://bsw.iitd.ac.in/temp/textwaaliimg.JPG",
+getImageData("https://scontent-bom1-1.xx.fbcdn.net/v/t1.0-9/26219964_1792997007401668_3510387456818212842_n.jpg?oh=8b2b882032a88bcdb8c57a1bb497af28&oe=5AF38D78",
     function(endJSON, endtext){
         console.log(JSON.stringify(endJSON, null, '  '));
         console.log(endtext);
