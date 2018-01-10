@@ -325,9 +325,33 @@ bot.dialog('/main', [
 //below dialogue calls the JS and prettifies the output
 bot.dialog('/properNoun', [
     function (session, args, next) {
+            // var msg = new builder.Message(session);
+            // msg.attachmentLayout(builder.AttachmentLayout.carousel)
+            // msg.attachments([
+            //     new builder.HeroCard(session)
+            //         .title("Classic White T-Shirt")
+            //         .subtitle("100% Soft and Luxurious Cotton")
+            //         .text("Price is $25 and carried in sizes (S, M, L, and XL)")
+            //         .images([builder.CardImage.create(session, 'http://petersapparel.parseapp.com/img/whiteshirt.png')])
+            //         .buttons([
+            //             builder.CardAction.imBack(session, "buy classic white t-shirt", "Buy")
+            //         ]),
+            //     new builder.HeroCard(session)
+            //         .title("Classic Gray T-Shirt")
+            //         .subtitle("100% Soft and Luxurious Cotton")
+            //         .text("Price is $25 and carried in sizes (S, M, L, and XL)")
+            //         .images([builder.CardImage.create(session, 'http://petersapparel.parseapp.com/img/grayshirt.png')])
+            //         .buttons([
+            //             builder.CardAction.imBack(session, "buy classic gray t-shirt", "Buy")
+            //         ])
+            // ]);
+            // session.send(msg);
+        // triggerAction({ matches: /^(show|list)/i });
+
         //generic callback
         session.send('In proper noun dialogue.');
-        
+        var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
+        var listCar=[] ;
         function callbackTerms2Info(jsonDataNoun,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success"){
                 session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
@@ -335,8 +359,26 @@ bot.dialog('/properNoun', [
             else{
                 session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
+            dict = jsonDataNoun[0];   
+            listCar +=  new builder.HeroCard(session)
+                    .title(dict['name'])
+                    .subtitle(dict['url'])
+                    .text(dict['description'])
+                    .images([builder.CardImage.create(session, dict['image'])])
+                    .buttons([
+                        builder.CardAction.imBack(session, "test button", "Do")]);
+                    
+            if(oquery == lastQueryNoun){
+                var msg = new builder.Message(session);
+
+                msg.attachmentLayout(builder.AttachmentLayout.carousel);
+                msg.attachments(listCar);
+                session.send(msg);
+            }
+            
             // resolveTrue = true;
         }
+        
         for(i in session.conversationData.terms){    
 
             try {
