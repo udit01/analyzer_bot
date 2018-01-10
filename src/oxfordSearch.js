@@ -90,7 +90,7 @@ let getOxfordData=function(inp,funcThoughRoot){
                 // console.log("Root detected LINE87: "+inp);
                 var lexicalentries = reqJson["results"][0]["lexicalEntries"];
                 var lengthlexicalentries = lexicalentries.length;
-            
+                
                 
                 //
                 for(var i=0;i<lengthlexicalentries;i++){
@@ -152,7 +152,7 @@ module.exports = {
 }
 
 //made for debugging
-// getOxfordData("set",
-//     function(enddat){
-//         console.log(enddat);
-//     }); 
+getOxfordData("set",
+    function(enddat){
+        console.log(enddat);
+    }); 
