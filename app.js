@@ -362,7 +362,7 @@ bot.dialog('/main', [
                 case "Current info <News>":
 
                     //News API, terms  
-                    session.send("Current info case detected");  
+                    //session.send("Current info case detected");  
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
                     // }
@@ -371,7 +371,7 @@ bot.dialog('/main', [
                 case "People also search for <Recommendations/Similar>":
 
                     //bing search recommnedation api 
-                    session.send("People also search for case detected");
+                    //session.send("People also search for case detected");
                     
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -381,7 +381,7 @@ bot.dialog('/main', [
                     break;
                 case "Scientific Domain <Academica>":
                     
-                    session.send("Scientific domain case detected");
+                    //session.send("Scientific domain case detected");
                     //academic api
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -390,7 +390,7 @@ bot.dialog('/main', [
                     break;
                 case "Term-Definition <Meaning>":
                     //oxford api
-                    session.send("Term defination case detected");
+                    //session.send("Term defination case detected");
                    
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -398,7 +398,7 @@ bot.dialog('/main', [
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
-                    session.send("External search engine links requested");
+                    //session.send("External search engine links requested");
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
                     // }
@@ -414,7 +414,7 @@ bot.dialog('/main', [
                 //     session.replaceDialog('/more')
                 //PUSH IT INTO A GENERIC SEARCH OR MORE CASE 
             }   
-            session.send('You are after the switch case in main');
+            //session.send('You are after the switch case in main');
             // }
         }
         else {
@@ -523,7 +523,7 @@ bot.dialog('/properNoun', [
 
 bot.dialog('/current', [
     function (session, args, next) {
-        session.send('In current news dialogue.');
+        //session.send('In current news dialogue.');
         var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
         var listCar=[] ;
 		var numW = 0;
@@ -533,7 +533,7 @@ bot.dialog('/current', [
 		
         function callbackNewsWords(jsonArrNewsWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The key word was: " + oquery);
+                //session.send("The key word was: " + oquery);
 				numW++;
 				//session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
 				dict = jsonArrNewsWords["results"][0]; 
@@ -554,14 +554,14 @@ bot.dialog('/current', [
                 }
             }
             else {
-                session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
+                //session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
             }
         }
 
         function callbackNews(jsonArrNews, oquery, stringCode) {
-            if (stringCode == "success") {
-                session.send("The original query was: " + oquery);
-				dict = jsonArrNewsWords["results"][0];
+            if (stringCode == "success" && JSON.stringify(jsonArrNews["results"])!="[]") {
+                //session.send("The original query was: " + oquery);
+				dict = jsonArrNews["results"][0];
 				var solocard = new builder.HeroCard(session)
 						.title(dict['name'])
 						.subtitle(dict['url'])
@@ -574,7 +574,7 @@ bot.dialog('/current', [
 				});
             }
             else {
-                session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
+                //session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
                 for (i in session.conversationData.terms) {
 
                     try {
@@ -600,7 +600,7 @@ bot.dialog('/current', [
         next();
     },
     function (session, results) {
-        session.send("Current Info dialogue has ended but wait for API call to finish!");
+        //session.send("Current Info dialogue has ended but wait for API call to finish!");
         session.endDialog();
     }
 ]);
@@ -612,7 +612,7 @@ bot.dialog('/similar', [
         
         function callbackSimilarWords(jsonDataSimilarWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonDataSimilarWords);
+                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + JSON.stringify(jsonDataSimilarWords));
             }
             else {
                 session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by Bing RecommededSearchAPI. ");

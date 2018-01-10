@@ -102,11 +102,11 @@ module.exports = {
 		'getImageData' : getImageData
 }
 
-getImageData("http://bsw.iitd.ac.in/temp/textwaaliimg.JPG",
-    function(endJSON, endtext){
-        console.log(JSON.stringify(endJSON, null, '  '));
-        console.log(endtext);
-    }); 
+// getImageData("http://bsw.iitd.ac.in/temp/textwaaliimg.JPG",
+    // function(endJSON, endtext){
+        // console.log(JSON.stringify(endJSON, null, '  '));
+        // console.log(endtext);
+    // }); 
 
 
 
