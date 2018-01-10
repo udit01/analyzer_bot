@@ -59,6 +59,9 @@ var brs = require('./src/bingRelatedSearch');
 var bns = require('./src/bingNewsSearch');
 var i2t = require('./src/url2image');
 
+// time for one hero card
+var timeOut = 1000;
+
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
 // })
@@ -234,7 +237,7 @@ bot.dialog('/main', [
         
         session.sendTyping();
         
-        session.send("You selected option:"+session.conversationData.mainPrompt);
+        //session.send("You selected option:"+session.conversationData.mainPrompt);
         
         if (args.response) {
             // var intents_in_resp = results.response.intents;
@@ -265,7 +268,7 @@ bot.dialog('/main', [
                     //term to info
 
                     //call a JS in the source here
-                    session.send("Proper Noun case detected");
+                    //session.send("Proper Noun case detected");
 
                     // while (!session.conversationData.boolTermsAPI){
                     //     //waiting for being true
@@ -386,30 +389,45 @@ bot.dialog('/properNoun', [
         session.send('In proper noun dialogue.');
         var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
         var listCar=[] ;
+		var numW = 0;
         function callbackTerms2Info(jsonDataNoun,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
-            if (stringCode == "success"){
-                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
+            if (stringCode != "success"){
+                //session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
             else{
-                session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
-            }
-            dict = jsonDataNoun[0];   
-            listCar +=  new builder.HeroCard(session)
-                    .title(dict['name'])
-                    .subtitle(dict['url'])
-                    .text(dict['description'])
-                    .images([builder.CardImage.create(session, dict['image'])])
-                    .buttons([
-                        builder.CardAction.imBack(session, "test button", "Do")]);
-                    
-            if(oquery == lastQueryNoun){
-                var msg = new builder.Message(session);
+				numW++;
+				//session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
+				dict = jsonDataNoun[0]; 
+				//console.log(dict);
+				listCar.push( new builder.HeroCard(session)
+						.title(dict['name'])
+						.subtitle(dict['url'])
+						.text(dict['description'])
+						.images([builder.CardImage.create(session, dict['image'])])
+						.buttons([
+							builder.CardAction.imBack(session, "test button", "Do")]));
+						
+				if(oquery == lastQueryNoun){
+					function sleepC(ms) {
+						return new Promise(resolve => setTimeout(resolve, ms));
+					}
 
-                msg.attachmentLayout(builder.AttachmentLayout.carousel);
-                msg.attachments(listCar);
-                session.send(msg);
+					async function demo() {
+						console.log('Taking a break...');
+						await sleepC(numW*timeOut);
+						// console.log('Ten second later');
+						var msg = new builder.Message(session);
+						//session.send("upcoming carousel");
+						msg.attachmentLayout(builder.AttachmentLayout.carousel);
+						msg.attachments(listCar);
+						console.log("Line 410--------------------"+listCar.length);
+						session.send(msg);
+					}
+
+					demo();
+					
+				}
             }
-            
             // resolveTrue = true;
         }
         
