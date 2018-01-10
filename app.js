@@ -487,8 +487,7 @@ bot.dialog('/properNoun', [
 						.subtitle(dict['url'])
 						.text(dict['description'])
 						.images([builder.CardImage.create(session, dict['image'])])
-						.buttons([
-                            builder.CardAction.imBack(session, "test button", "Do")]));
+						);
 						
 				if(oquery == lastQueryNoun){
 					delayer(numW,function (){//this function will be automatically delayed
@@ -523,11 +522,11 @@ bot.dialog('/properNoun', [
 
 bot.dialog('/current', [
     function (session, args, next) {
-        //session.send('In current news dialogue.');
+        session.send('In current news dialogue.');
         var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
         var listCar=[] ;
 		var numW = 0;
-        var answerJSON;
+        //var answerJSON;
 		
 		
 		
@@ -669,21 +668,51 @@ bot.dialog('/acad', [
     function (session, args, next) {
         session.send("In Academic dialogue");
         //you can search for whole in the acad
-        var acadBool = false ;
+        //var acadBool = false ;
         var lastIndexAcad = session.conversationData.terms.length - 1;
         var lastQuery = session.conversationData.terms[lastIndexAcad]
+		var listCar=[] ;
+		var numW = 0;
+        //	var answerJSON;
+		
 
         function callbackTerms2Acad(jsonDataAcad, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             
             if (stringCode == "success") {
-                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataAcad);
+                //session.send("The keyword was: " + oquery);
+				if (JSON.stringify(jsonDataAcad) != "[]") {
+					//session.send("The key word was: " + oquery);
+					numW++;
+					//session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
+					dict = jsonDataAcad[0]; 
+					if (dict['abst']!=""){
+						listCar.push( new builder.HeroCard(session)
+								.title(dict['Ti'])
+								.subtitle(dict['url'])
+								.text(dict['abst']));
+					}
+							
+					if(oquery == lastQuery && dict['abst']!=undefined){
+						delayer(numW/5,function (){//this function will be automatically delayed
+							var msg = new builder.Message(session);
+							msg.attachmentLayout(builder.AttachmentLayout.carousel);
+							msg.attachments(listCar);
+							session.send(msg);
+						});					
+
+					}
+				}
+				else {
+					//session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
+				}
+				jsonDataAcad
             }
             else {
                 // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
-            if(oquery == lastQuery){
-                acadBool = true;
-            }
+            // if(oquery == lastQuery){
+                // acadBool = true;
+            // }
             // resolveTrue = true;
         }
 
@@ -715,7 +744,7 @@ bot.dialog('/acad', [
         next();
     },
     function (session, results) {
-        session.send("End of Academic dialogue but wait for the API call to finish.");
+        //session.send("End of Academic dialogue but wait for the API call to finish.");
         session.endDialog();
     }
 ]);
