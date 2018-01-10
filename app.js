@@ -18,6 +18,11 @@ var connector = new builder.ChatConnector({
 
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
+server.get('/', restify.plugins.serveStatic({
+    directory: __dirname,
+    default: '/index.html'
+}));
+
 
 /*----------------------------------------------------------------------------------------
 * Bot Storage: This is a great spot to register the private state storage for your bot. 
