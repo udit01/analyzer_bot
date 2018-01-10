@@ -320,7 +320,7 @@ bot.dialog('/main', [
         //session.sendTyping();
         
         //session.send("You selected option:"+session.conversationData.mainPrompt);
-        console.log("line241------------"+results.response);
+        //console.log("line241------------"+results.response);
 		
         if (results.response) {
             // var intents_in_resp = results.response.intents;
@@ -421,23 +421,24 @@ bot.dialog('/main', [
             session.endDialog();
         }
         //next();
-    },
-    function (session, args,next) {
-        // The menu runs a loop until the user chooses to (quit).
-        builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
-    },
-    function (session, results) {
-        // The menu runs a loop until the user chooses to (quit).
-        // session.conversationData.moreBool = results.response;
+    }
+	// ,
+    // function (session, args,next) {
+        // // The menu runs a loop until the user chooses to (quit).
+        // builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
+    // },
+    // function (session, results) {
+        // // The menu runs a loop until the user chooses to (quit).
+        // // session.conversationData.moreBool = results.response;
         
-        //CHECK SYNTAX BELOW
-        if (results.response == true ){
-            session.replaceDialog('/more');
-        }
-        else{
-            session.replaceDialog('/exit');
-        }
-    }    
+        // //CHECK SYNTAX BELOW
+        // if (results.response == true ){
+            // session.replaceDialog('/more');
+        // }
+        // else{
+            // session.replaceDialog('/exit');
+        // }
+    // }    
 ]);
 
 
@@ -468,7 +469,7 @@ bot.dialog('/properNoun', [
         // triggerAction({ matches: /^(show|list)/i });
 
         //generic callback
-        session.send('In proper noun dialogue.');
+        //session.send('In proper noun dialogue.');
         var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
         var listCar=[] ;
 		var numW = 0;
@@ -515,19 +516,19 @@ bot.dialog('/properNoun', [
         next();
     },
     function (session, results) {
-        session.send("Proper Noun dialogue has ended but wait for API call to finish!");
+        //session.send("Proper Noun dialogue has ended but wait for API call to finish!");
         session.endDialog();
     }
 ]);
 
 bot.dialog('/current', [
     function (session, args, next) {
-        session.send('In current news dialogue.');
-        
+        console.log('In current news dialogue.');
 
         function callbackNewsWords(jsonArrNewsWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
-            if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonArrNewsWords);
+            console.log(jsonArrNewsWords+"for words in news");
+			if (stringCode == "success") {
+                session.send("The key word was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + JSON.stringify(jsonArrNewsWords));
             }
             else {
                 session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
@@ -536,8 +537,9 @@ bot.dialog('/current', [
         }
 
         function callbackNews(jsonArrNews, oquery, stringCode) {
-            if (stringCode == "success") {
-                session.send("The original query was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonArrNews);
+            console.log(JSON.stringify(jsonArrNews.results))
+			if (stringCode == "success" && JSON.stringify(jsonArrNews["results"])!="[]") {
+                session.send("The original query was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + JSON.stringify(jsonArrNews));
             }
             else {
                 session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");

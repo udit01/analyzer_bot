@@ -41,7 +41,8 @@ let get_meaning = function (inp, func1) {
 				// console.log("Line 44:" +JSON.stringify(reqJson['results']));
 				rootWord = lexEntryVal['inflectionOf'][0]['id'] ;
 					//or can use 'word'
-            }
+
+					}
             catch(e){
                 rootWord = inp;
                 console.log(""+e);
@@ -152,7 +153,7 @@ module.exports = {
 }
 
 //made for debugging
-getOxfordData("set",
-    function(enddat){
-        console.log(enddat);
-    }); 
+// getOxfordData("set",
+    // function(enddat){
+        // console.log(enddat);
+    // }); 
