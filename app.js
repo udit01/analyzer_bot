@@ -54,7 +54,7 @@ var t2i = require('./src/term2info');
 var t2a = require('./src/term2academic');
 var bs = require('./src/bingSearch');
 var t2n = require('./src/bingNewsSearch');
-var t2m = require('./src/oxfordSearch');
+var oxf = require('./src/oxfordSearch');
 var brs = require('./src/bingRelatedSearch');
 var bns = require('./src/bingNewsSearch');
 
@@ -181,39 +181,9 @@ bot.dialog('/main', [
                 function (jsonarr) {
                     session.conversationData.terms = jsonarr;
                     session.send("The key terms TextAnalytics/Linguistic API are :" + session.conversationData.terms);
+                    session.conversationData.boolTermsAPI = true;
 
             });
-
-   
-            // session.conversationData.boolTermsAPI = false;
-
-            // function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
-                
-            //     session.conversationData.terms = jsonarr;
-            //     session.send("Your key words detected by us are :" + session.conversationData.terms);
-            //     session.conversationData.boolTermsAPI = true;
-            // }
-            
-            // t2t.get_terms(session.conversationData.mainEntry, callback );
-
-            //below code was written to test the src files while not messing with the version of Udit
-
-            session.conversationData.boolTermsAPI = false;
-
-            function callback(jsondata) {//this is by call back function from which i want a promise to be returned
-                
-                session.conversationData.meaning = jsondata;
-                session.send(session.conversationData.meaning);
-                // session.conversationData.terms = jsonarr;
-                // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
-                // let termPromise = new Promise();
-                session.conversationData.boolTermsAPI = true;
-            }
-            
-            t2m.getOxfordData(session.conversationData.mainEntry, callback );
-            // tc.get_terms(session.conversationData.mainEntry, callback );
-
-
           
         }
         catch (e) {
@@ -533,10 +503,31 @@ bot.dialog('/acad', [
 
 bot.dialog('/meaning', [
     function (session, args, next) {
-        //call some API in the src directory with the conversation data you have
+
+        session.send("You are in the meaning dialogue");
+
+        function callbackOxfordAPI(resultOxfordAPI,origWord,stringCode) {//this is by call back function from which i want a promise to be returned
+            if(stringCode == "success"){
+                session.send("Your word was : "+ origWord + ".\n\nResults found by Oxford API are : \n\n"+resultOxfordAPI);
+            }
+            else{
+                session.send("Your word was : " + origWord + ".\n\nNo results found by Oxford API. Error String : \n\n" + stringCode);
+            }
+        }
+
+        for (i in session.conversationData.terms) {
+
+            try {
+                // var resolveTrue = false
+                oxf.getOxfordData(session.conversationData.mainEntry, callbackOxfordAPI);
+            }
+            catch (e) {
+                console.log("" + e);
+            }
+        }
     },
     function (session, results) {
-
+        session.send("Meaning Dialogue has ended but wait for the API call to finish and fetch results");
         session.endDialog();
     }
 ]);

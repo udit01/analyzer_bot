@@ -1,10 +1,8 @@
-//to be done
 'use strict';
 
 let https = require('https');
 let app_id = process.env.OXFORDAPPID;
 let app_key = process.env.OXFORDAPPKEY;
-//let subscriptionKey = process.env.BingSearchAPIKey;
 //let host = 'od-api.oxforddictionaries.com/api/v1';
 let path = '/api/v1/entries/en';
 
@@ -13,7 +11,7 @@ let path = '/api/v1/entries/en';
 
 let getOxfordData=function(inp,func1){
     
-    console.log('Searching oxford searches the Web for: ' + inp);
+    // console.log('Searching oxford searches the Web for: ' + inp);
     let request_params = {
         method: 'GET',
         hostname: "od-api.oxforddictionaries.com",
@@ -24,24 +22,27 @@ let getOxfordData=function(inp,func1){
             "app_key": app_key
         }
     };
-    console.log("lets see");
+    // console.log("lets see");
     let req = https.request(request_params, function(response){
         let body = '';
-        console.log("dekho bhai");
+        // console.log("dekho bhai");
         response.on('data', function (d) {
             body += d;
         });
         response.on('end', function () {
             var reqJson = JSON.parse(body);
             var finjson = JSON.stringify(reqJson, null, '  ');
-            console.log(finjson);
+            // console.log(finjson);
             var lexicalentries = reqJson["results"][0]["lexicalEntries"];
             var lengthlexicalentries = lexicalentries.length;
             var findata = "";
+            var stringCode = "success";
+
+            //
             for(var i=0;i<lengthlexicalentries;i++){
                 var lexicalcategory = lexicalentries[i]["lexicalCategory"];
                 findata += "Lexical Category: "  + lexicalcategory+ "\n\n";
-                console.log("lexcat was "+i);
+                // console.log("lexcat was "+i);
                 var entries = lexicalentries[i]["entries"];
                 var numentries = entries.length;
                 var numdef =0;
@@ -60,11 +61,13 @@ let getOxfordData=function(inp,func1){
                                 var examples= thissense["examples"][0]["text"];
                                 findata += "Example: "+ examples + "\n\n";
                             }catch(e){
-                                console.log("cant find example");
+                                // console.log("cant find example");
                                 findata += "\n";
+
                             }
                         }catch(e){
-                            console.log("defintion found for this one");
+                            console.log(""+e);
+                            stringCode = "Defination not found for" + inp;
                         }
                         
                         
@@ -73,11 +76,11 @@ let getOxfordData=function(inp,func1){
                 findata+= "----------------------"+"\n\n";
             }
 
-            func1(findata);
+            func1(findata,inp,stringCode);
             
         });
         response.on('error', function (e) {
-            console.log('Error: ' + e.message);
+            console.log(""+e);
         });
 
     });
@@ -89,7 +92,7 @@ module.exports = {
 }
 
 //made for debugging
-getOxfordData("set",
-    function(enddat){
-        console.log(enddat);
-    }); 
+// getOxfordData("set",
+//     function(enddat){
+//         console.log(enddat);
+//     }); 
