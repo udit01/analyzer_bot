@@ -523,23 +523,55 @@ bot.dialog('/properNoun', [
 
 bot.dialog('/current', [
     function (session, args, next) {
-        console.log('In current news dialogue.');
-
+        session.send('In current news dialogue.');
+        var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
+        var listCar=[] ;
+		var numW = 0;
+        var answerJSON;
+		
+		
+		
         function callbackNewsWords(jsonArrNewsWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
-            console.log(jsonArrNewsWords+"for words in news");
-			if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + JSON.stringify(jsonArrNewsWords));
+            if (stringCode == "success") {
+                session.send("The key word was: " + oquery);
+				numW++;
+				//session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
+				dict = jsonArrNewsWords["results"][0]; 
+				//console.log(dict);
+				listCar.push( new builder.HeroCard(session)
+						.title(dict['name'])
+						.subtitle(dict['url'])
+						.text(dict['description']));
+						
+				if(oquery == lastQueryNoun){
+					delayer(numW,function (){//this function will be automatically delayed
+                        var msg = new builder.Message(session);
+                        msg.attachmentLayout(builder.AttachmentLayout.carousel);
+                        msg.attachments(listCar);
+                        session.send(msg);
+                    });					
+
+                }
             }
             else {
                 session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
-
             }
         }
 
         function callbackNews(jsonArrNews, oquery, stringCode) {
-            console.log(JSON.stringify(jsonArrNews.results))
-			if (stringCode == "success" && JSON.stringify(jsonArrNews["results"])!="[]") {
-                session.send("The original query was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + JSON.stringify(jsonArrNews));
+            if (stringCode == "success") {
+                session.send("The original query was: " + oquery);
+				dict = jsonArrNewsWords["results"][0];
+				var solocard = new builder.HeroCard(session)
+						.title(dict['name'])
+						.subtitle(dict['url'])
+						.text(dict['description']);
+				delayer(1,function (){//this function will be automatically delayed
+					var msg = new builder.Message(session);
+					msg.attachmentLayout(builder.AttachmentLayout.carousel);
+					msg.attachments(listCar);
+					session.send(msg);
+				});
             }
             else {
                 session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
