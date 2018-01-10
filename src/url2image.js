@@ -55,6 +55,8 @@ let getRealData = function (documents, func) {
 			//let body__ = body_['documents'][0]['keyPhrases'];
              //let body1 = JSON.stringify (body, null, '  ');
             var finmessage = "";
+            var imJSON = {};
+            imJSON["regions"]= [];
             try{
                 var regionsarr = findata["regions"]
                 var numregions = regionsarr.length;
@@ -62,13 +64,17 @@ let getRealData = function (documents, func) {
                     var thisregion = regionsarr[i];
                     var linearr = thisregion["lines"];
                     var numlinearr = linearr.length;
+                    imJSON["regions"][i]={};
+                    imJSON["regions"][i]["lines"] = [];
                     for(var j=0;j<numlinearr;j++){
                         var thisline =linearr[j];
                         var wordarr = thisline["words"];
+                        var thislinestring = "";
                         var numwords = wordarr.length;
                         for(var k=0;k<numwords;k++){
                             finmessage += wordarr[k]["text"] +" ";
-
+                            thislinestring += wordarr[k]["text"]+" ";
+                            imJSON["regions"][i]["lines"][j]= thislinestring;
                         }
                         finmessage += "\n\n";
 
@@ -79,7 +85,7 @@ let getRealData = function (documents, func) {
                 finmessage = "Some error, try again later";
             }
                
-			func(finmessage);
+			func(imJSON, finmessage);
 		});
 		response.on ('error', function (e) {
 			console.log("" + e);
@@ -96,10 +102,11 @@ module.exports = {
 		'getImageData' : getImageData
 }
 
-// getImageData("blob:https://webchat.botframework.com/11b096f3-d21d-413d-b1f1-ae2ee702d35a",
-//     function(enddat){
-//         console.log(enddat);
-//     }); 
+getImageData("http://bsw.iitd.ac.in/temp/textwaaliimg.JPG",
+    function(endJSON, endtext){
+        console.log(JSON.stringify(endJSON, null, '  '));
+        console.log(endtext);
+    }); 
 
 
 
