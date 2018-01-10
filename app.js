@@ -200,19 +200,19 @@ bot.dialog('/main', [
 
             //below code was written to test the src files while not messing with the version of Udit
 
-            session.conversationData.boolTermsAPI = false;
+            // session.conversationData.boolTermsAPI = false;
 
-            function callback(jsondata) {//this is by call back function from which i want a promise to be returned
+            // function callback(jsondata) {//this is by call back function from which i want a promise to be returned
                 
-                session.conversationData.text = jsondata;
-                session.send(session.conversationData.text);
-                // session.conversationData.terms = jsonarr;
-                // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
-                // let termPromise = new Promise();
-                session.conversationData.boolTermsAPI = true;
-            }
+            //     session.conversationData.text = jsondata;
+            //     session.send(session.conversationData.text);
+            //     // session.conversationData.terms = jsonarr;
+            //     // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
+            //     // let termPromise = new Promise();
+            //     session.conversationData.boolTermsAPI = true;
+            // }
             
-            i2t.getImageData(session.conversationData.mainEntry, callback );
+            // i2t.getImageData(session.conversationData.mainEntry, callback );
             // tc.get_terms(session.conversationData.mainEntry, callback );
 
 
