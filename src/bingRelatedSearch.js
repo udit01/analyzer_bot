@@ -9,7 +9,7 @@ let path = '/bing/v7.0/search';
 
 let getRelatedData=function(inp,func1){
     
-    console.log('Searching related searches the Web for: ' + inp);
+    // console.log('Searching related searches the Web for: ' + inp);
     let request_params = {
         method: 'GET',
         hostname: host,

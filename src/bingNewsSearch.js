@@ -11,7 +11,7 @@ var maxresults=10;
 
 let getNewsData=function(inp,func1){
     
-    console.log('Searching news searches the Web for: ' + inp);
+    // console.log('Searching news searches the Web for: ' + inp);
     let request_params = {
         method: 'GET',
         hostname: host,
@@ -29,29 +29,33 @@ let getNewsData=function(inp,func1){
             var reqJson = JSON.parse(body);
             var finjson = JSON.stringify(reqJson, null, '  ');
             //console.log(finjson);
+            var stringCode = "success";
+
             try{
                 var relatedNewsSearchArr = reqJson["value"];
                 var numResults = relatedNewsSearchArr.length;
-                console.log(numResults);
+                // console.log(numResults);
                 var relatedNewsSearchMessage = '';
-                console.log('was executed');
+                // console.log('was executed');
                 for(var i=0;i<numResults && i<=maxresults;i++){
-                    console.log(i);
+                    // console.log(i);
                     try{
                         relatedNewsSearchMessage += relatedNewsSearchArr[i]["name"]+" " +relatedNewsSearchArr[i]["url"]+"\n\n"+relatedNewsSearchArr[i]["description"]+"\n\n"+"Provider: "+relatedNewsSearchArr[i]["provider"][0]["name"]+ "\n\n"+"---------------------"+ "\n\n";
                     }catch(e){
                         relatedNewsSearchMessage += relatedNewsSearchArr[i]["name"]+" " +relatedNewsSearchArr[i]["url"]+"\n\n"+relatedNewsSearchArr[i]["description"]+"\n\n";
                     }
                 }
-                console.log("relatedresults being displayed");
-                func1(relatedNewsSearchMessage);
+                // console.log("relatedresults being displayed");
             }catch(e){
-                func1("cant find related searches");
+                console.log(""+e);
+                stringCode = "Couldn't find relevant news";
+
             }
+            func1(relatedNewsSearchMessage,inp,stringCode);
             
         });
         response.on('error', function (e) {
-            console.log('Error: ' + e.message);
+            console.log(""+ e);
         });
 
     });

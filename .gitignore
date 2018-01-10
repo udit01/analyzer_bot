@@ -1,5 +1,6 @@
 ignore/
 envVar/
+exportVars.sh
 src/text2termspre
 .vs/
 
