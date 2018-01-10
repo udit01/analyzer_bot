@@ -55,7 +55,7 @@ let getRealData = function (documents, func) {
 			//let body__ = body_['documents'][0]['keyPhrases'];
              //let body1 = JSON.stringify (body, null, '  ');
             var finmessage = "";
-            // try{
+            try{
                 var regionsarr = findata["regions"]
                 var numregions = regionsarr.length;
                 for(var i=0;i<numregions;i++){
@@ -75,9 +75,9 @@ let getRealData = function (documents, func) {
                     }
                     finmessage += "---------------------------"+ "\n\n";
                 }
-            // }catch(e){
-            //     finmessage = "Some error, try again later";
-            // }
+            }catch(e){
+                finmessage = "Some error, try again later";
+            }
                
 			func(finmessage);
 		});
@@ -96,7 +96,7 @@ module.exports = {
 		'getImageData' : getImageData
 }
 
-// getImageData("http://bsw.iitd.ac.in/temp/textwaaliimg.JPG",
+// getImageData("blob:https://webchat.botframework.com/11b096f3-d21d-413d-b1f1-ae2ee702d35a",
 //     function(enddat){
 //         console.log(enddat);
 //     }); 
