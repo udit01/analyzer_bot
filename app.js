@@ -24,6 +24,27 @@ server.post('/api/messages', connector.listen());
 * We provide adapters for Azure Table, CosmosDb, SQL Azure, or you can implement your own!
 * For samples and documentation, see: https://github.com/Microsoft/BotBuilder-Azure
 * ---------------------------------------------------------------------------------------- */
+// var bot = new builder.UniversalBot(connector, function () {
+//     console.log("entered in this one");
+//     // var msg = session.message;
+//     // if (msg.attachments && msg.attachments.length > 0) {
+//     //  // Echo back attachment
+//     //  var attachment = msg.attachments[0];
+//     //     session.send({
+//     //         text: "You sent:",
+//     //         attachments: [
+//     //             {
+//     //                 contentType: attachment.contentType,
+//     //                 contentUrl: attachment.contentUrl,
+//     //                 name: attachment.name
+//     //             }
+//     //         ]
+//     //     });
+//     // } else {
+//     //     // Echo back users text
+//     //     session.send("You said: %s", session.message.text);
+//     // }
+// });
 
 var tableName = 'botdata';
 var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
@@ -31,6 +52,16 @@ var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azu
 
 // Create your bot with a function to receive messages from the user
 var bot = new builder.UniversalBot(connector);
+// bot.recognizer(new builder.RegExpRecognizer( "CancelIntent", { en_us: /^(cancel|nevermind)/i, ja_jp: /^(キャンセル)/ }));
+// bot.dialog('CancelDialog', function (session) {
+//     session.endConversation("Ok, I'm canceling your order.");
+// }).triggerAction({ matches: 'CancelIntent' });
+
+
+//trying
+// Create your bot with a function to receive messages from the user
+
+
 bot.set('storage', tableStorage);
 
 // Make sure you add code to validate these fields
@@ -42,8 +73,9 @@ const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v1/application?id=' +
 
 // Main dialog with LUIS
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
-var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
+
+var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 //CUSTOM ENV VARIABLES:
 var FeedbackFormUrl = process.env.FeedbackFormURL;
 
@@ -80,7 +112,12 @@ var timeOut = 1000;
 
 
 
-bot.dialog('/', intents);   
+bot.dialog('/', intents); 
+// try{
+//     console.log("message was : : "+session.message.text);
+// }catch(e){
+//     console.log("message was dunno");
+// }  
 intents.matches('Greeting', '/greeting');
 intents.matches('Help', '/help');
 intents.matches('Exit', '/exit');
@@ -88,8 +125,10 @@ intents.matches('Exit', '/exit');
 intents.matches('None', '/main');
 // intents.matches('Main', '/main');
 // intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
+//intents.matches('null','/image');
 
 intents.onDefault((session) => {//for NONE
+    //console.log("image debugger");
     // DO SOMETHING RANDOM HERE ----------------------------------------LIKE THOUGHTFUL THINGS OR QUOTES ETC ---------------------  
     session.send('This is the default intent and it repeates your message: \'%s\'.', session.message.text);
 });
@@ -121,6 +160,8 @@ bot.dialog('/greeting', [
         session.replaceDialog('/main');
     }
 ]);
+
+
 
 
 
@@ -168,10 +209,34 @@ bot.dialog('/help', [
     }
 ]);
 
+// bot.dialog('/image', [
+//     function (session) {
+//         console.log("maybe image");
+//         // var introCard = new builder.HeroCard(session)
+//         //     .title("Analyzer Bot")
+//         //     .text("Increasing your productivity")
+//         //     .images([
+//         //         builder.CardImage.create(session, "https://blog.growthexp.com/wp-content/uploads/2017/08/Analytics.jpg")
+//         //     ]);
+//         // var msg = new builder.Message(session).attachments([introCard]);
+//         session.send("maybe image");
+//         // introMessage.forEach(function (ms) {
+//         //     session.send(ms);
+//         // });
+
+//         // helpMessage.forEach(function (ms) {
+//         //     session.send(ms);
+//         // });
+//         session.endDialog();
+//     }
+// ]);
+
+
 bot.dialog('/main', [
     function (session, args, next) {
         //check for the user-data completeness here
         // save the data sent by user to jump to this intent somewhere!
+        console.log("entered in main");
         
         session.conversationData.mainEntry = session.message.text ;  //starting para of the user
         
@@ -203,19 +268,19 @@ bot.dialog('/main', [
 
             //below code was written to test the src files while not messing with the version of Udit
 //uncomment this to run the image part
-            // session.conversationData.boolTermsAPI = false;
+            session.conversationData.boolTermsAPI = false;
 
-            // function callback(jsondata) {//this is by call back function from which i want a promise to be returned
+            function callback(jsondata) {//this is by call back function from which i want a promise to be returned
                 
-            //     session.conversationData.text = jsondata;
-            //     session.send(session.conversationData.text);
-            //     // session.conversationData.terms = jsonarr;
-            //     // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
-            //     // let termPromise = new Promise();
-            //     session.conversationData.boolTermsAPI = true;
-            // }
+                session.conversationData.text = jsondata;
+                session.send(session.conversationData.text);
+                // session.conversationData.terms = jsonarr;
+                // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
+                // let termPromise = new Promise();
+                session.conversationData.boolTermsAPI = true;
+            }
             
-            // i2t.getImageData(session.conversationData.mainEntry, callback );
+            i2t.getImageData(session.conversationData.mainEntry, callback );
 
 //uncomment till this
             // tc.get_terms(session.conversationData.mainEntry, callback );
