@@ -1,4 +1,5 @@
-var wordLimit = 15;
+var wordLowerLimit = 4;//broken english if less than this
+var wordUpperLimit = 20;
 
 var t2t = require('./text2terms');
 var t2n = require('./text2nouns');
@@ -6,9 +7,9 @@ var t2n = require('./text2nouns');
 
 function get_terms_combined(input, callbackTerms){
 
-    var currentLenght = input.split(" ");
+    var currentLength = input.split(" ");
     
-    if(currentLenght<=wordLimit){
+    if ((currentLength <= wordUpperLimit) && (wordLowerLimit <= currentLength)){
         t2n.get_nouns(input,callbackTerms);
     }
     else{
