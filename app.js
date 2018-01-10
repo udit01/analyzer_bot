@@ -199,7 +199,7 @@ bot.dialog('/main', [
             // t2t.get_terms(session.conversationData.mainEntry, callback );
 
             //below code was written to test the src files while not messing with the version of Udit
-
+//uncomment this to run the image part
             // session.conversationData.boolTermsAPI = false;
 
             // function callback(jsondata) {//this is by call back function from which i want a promise to be returned
@@ -213,6 +213,8 @@ bot.dialog('/main', [
             // }
             
             // i2t.getImageData(session.conversationData.mainEntry, callback );
+
+//uncomment till this
             // tc.get_terms(session.conversationData.mainEntry, callback );
 
 
