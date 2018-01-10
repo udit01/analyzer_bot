@@ -10,11 +10,11 @@ let https = require ('https');
 let subscriptionKey = process.env.AcademicKnowledgeAPIKey;
 
 var numberOfResults = 3;
-var word = "Default Word in text2academic.js"
+// var word = "Default Word in text2academic.js"
 let host = 'westus.api.cognitive.microsoft.com';
 let path = '/academic/v1.0/';
 
-let Search = function (query, funcThroughGQ) {
+let Search = function (query, inp,funcThroughGQ) {
     
 	var params2 = 'evaluate?expr=' + encodeURI(query) + "&attributes=Ti,Y,AA.AuN,AA.AuId,E&count="+numberOfResults;
 	let request_params = {
@@ -64,7 +64,8 @@ let Search = function (query, funcThroughGQ) {
 		}
         let body__ = JSON.stringify (body_, null, '  ');
 		// console.log (body__);
-		funcThroughGQ(body__,word,stringCode);
+		// console.log("Line 67 word is:" + word);
+		funcThroughGQ(body__,inp,stringCode);
     });
     response.on ('error', function (e) {
         console.log ("" + e);
@@ -75,7 +76,6 @@ let Search = function (query, funcThroughGQ) {
 }
 
 let get_queries = function (inp, funcFromApp) {
-	word = inp;
 	let params1 = 'interpret?query=' + encodeURI(inp)
     let request_params = {
         method : 'GET',
@@ -117,11 +117,12 @@ let get_queries = function (inp, funcFromApp) {
 
 		if (body_[0] != undefined){
 			// console.log(body_[0]);
-			Search(body_[0], funcFromApp);
+			Search(body_[0],inp, funcFromApp);
 		}
 		else{
 			// stringCode = "generic";
-			Search(qgeneric(inp), funcFromApp);
+			Search(qgeneric(inp),inp, funcFromApp);
+
 		}			
     });
     response.on ('error', function (e) {
