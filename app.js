@@ -62,6 +62,23 @@ var i2t = require('./src/url2image');
 // time for one hero card
 var timeOut = 1000;
 
+// Custom functions -----------------------------------------
+function delayer(multiplier,callbackGeneric){//and 1 global parameter timeout
+    function sleepC(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function demo() {
+        // console.log('Taking a break...');
+        await sleepC(multiplier * timeOut);
+        callbackGeneric();
+        
+        // console.log('Ten second later');
+    }
+
+    demo();
+}
+
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
 // })
@@ -405,28 +422,17 @@ bot.dialog('/properNoun', [
 						.text(dict['description'])
 						.images([builder.CardImage.create(session, dict['image'])])
 						.buttons([
-							builder.CardAction.imBack(session, "test button", "Do")]));
+                            builder.CardAction.imBack(session, "test button", "Do")]));
 						
 				if(oquery == lastQueryNoun){
-					function sleepC(ms) {
-						return new Promise(resolve => setTimeout(resolve, ms));
-					}
+					delayer(numW,function (){//this function will be automatically delayed
+                        var msg = new builder.Message(session);
+                        msg.attachmentLayout(builder.AttachmentLayout.carousel);
+                        msg.attachments(listCar);
+                        session.send(msg);
+                    });					
 
-					async function demo() {
-						console.log('Taking a break...');
-						await sleepC(numW*timeOut);
-						// console.log('Ten second later');
-						var msg = new builder.Message(session);
-						//session.send("upcoming carousel");
-						msg.attachmentLayout(builder.AttachmentLayout.carousel);
-						msg.attachments(listCar);
-						console.log("Line 410--------------------"+listCar.length);
-						session.send(msg);
-					}
-
-					demo();
-					
-				}
+                }
             }
             // resolveTrue = true;
         }
@@ -726,7 +732,6 @@ bot.dialog('/more',[
 // var e2d = require('./src/entity2dict');
 
 
-// Custom functions -----------------------------------------
 // function findAllFromName(entities,entityName) {
 //     var arr = []
 
