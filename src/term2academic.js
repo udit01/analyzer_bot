@@ -62,10 +62,10 @@ let Search = function (query, inp,funcThroughGQ) {
 			body_ = body_.queryContext;
 			stringCode = "acad_api_found_nothing.";
 		}
-        let body__ = JSON.stringify (body_, null, '  ');
+        //let body__ = JSON.stringify (body_, null, '  ');
 		// console.log (body__);
 		// console.log("Line 67 word is:" + word);
-		funcThroughGQ(body__,inp,stringCode);
+		funcThroughGQ(body_,inp,stringCode);
     });
     response.on ('error', function (e) {
         console.log ("" + e);
@@ -171,3 +171,7 @@ module.exports = {
 	'Search': Search
 }
 
+// get_queries("quantum mechanics",
+//     function(enddat){
+//         console.log(JSON.stringify(enddat, null, '  '));
+//     }); 

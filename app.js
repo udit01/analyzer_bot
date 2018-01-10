@@ -29,6 +29,27 @@ server.get('/', restify.plugins.serveStatic({
 * We provide adapters for Azure Table, CosmosDb, SQL Azure, or you can implement your own!
 * For samples and documentation, see: https://github.com/Microsoft/BotBuilder-Azure
 * ---------------------------------------------------------------------------------------- */
+// var bot = new builder.UniversalBot(connector, function () {
+//     console.log("entered in this one");
+//     // var msg = session.message;
+//     // if (msg.attachments && msg.attachments.length > 0) {
+//     //  // Echo back attachment
+//     //  var attachment = msg.attachments[0];
+//     //     session.send({
+//     //         text: "You sent:",
+//     //         attachments: [
+//     //             {
+//     //                 contentType: attachment.contentType,
+//     //                 contentUrl: attachment.contentUrl,
+//     //                 name: attachment.name
+//     //             }
+//     //         ]
+//     //     });
+//     // } else {
+//     //     // Echo back users text
+//     //     session.send("You said: %s", session.message.text);
+//     // }
+// });
 
 var tableName = 'botdata';
 var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
@@ -36,6 +57,16 @@ var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azu
 
 // Create your bot with a function to receive messages from the user
 var bot = new builder.UniversalBot(connector);
+// bot.recognizer(new builder.RegExpRecognizer( "CancelIntent", { en_us: /^(cancel|nevermind)/i, ja_jp: /^(キャンセル)/ }));
+// bot.dialog('CancelDialog', function (session) {
+//     session.endConversation("Ok, I'm canceling your order.");
+// }).triggerAction({ matches: 'CancelIntent' });
+
+
+//trying
+// Create your bot with a function to receive messages from the user
+
+
 bot.set('storage', tableStorage);
 
 // Make sure you add code to validate these fields
@@ -47,8 +78,9 @@ const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v1/application?id=' +
 
 // Main dialog with LUIS
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
-var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 
+
+var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 //CUSTOM ENV VARIABLES:
 var FeedbackFormUrl = process.env.FeedbackFormURL;
 
@@ -102,7 +134,12 @@ function delayer(multiplier,callbackGeneric){//and 1 global parameter timeout
 
 
 
-bot.dialog('/', intents);   
+bot.dialog('/', intents); 
+// try{
+//     console.log("message was : : "+session.message.text);
+// }catch(e){
+//     console.log("message was dunno");
+// }  
 intents.matches('Greeting', '/greeting');
 intents.matches('Help', '/help');
 intents.matches('Exit', '/exit');
@@ -110,8 +147,10 @@ intents.matches('Exit', '/exit');
 intents.matches('None', '/main');
 // intents.matches('Main', '/main');
 // intents.matches('Reminder', '/reminder'); // to set remider after 1 day or something
+//intents.matches('null','/image');
 
 intents.onDefault((session) => {//for NONE
+    //console.log("image debugger");
     // DO SOMETHING RANDOM HERE ----------------------------------------LIKE THOUGHTFUL THINGS OR QUOTES ETC ---------------------  
     session.send('This is the default intent and it repeates your message: \'%s\'.', session.message.text);
 });
@@ -143,6 +182,8 @@ bot.dialog('/greeting', [
         session.replaceDialog('/main');
     }
 ]);
+
+
 
 
 
@@ -190,10 +231,34 @@ bot.dialog('/help', [
     }
 ]);
 
+// bot.dialog('/image', [
+//     function (session) {
+//         console.log("maybe image");
+//         // var introCard = new builder.HeroCard(session)
+//         //     .title("Analyzer Bot")
+//         //     .text("Increasing your productivity")
+//         //     .images([
+//         //         builder.CardImage.create(session, "https://blog.growthexp.com/wp-content/uploads/2017/08/Analytics.jpg")
+//         //     ]);
+//         // var msg = new builder.Message(session).attachments([introCard]);
+//         session.send("maybe image");
+//         // introMessage.forEach(function (ms) {
+//         //     session.send(ms);
+//         // });
+
+//         // helpMessage.forEach(function (ms) {
+//         //     session.send(ms);
+//         // });
+//         session.endDialog();
+//     }
+// ]);
+
+
 bot.dialog('/main', [
     function (session, args, next) {
         //check for the user-data completeness here
         // save the data sent by user to jump to this intent somewhere!
+        console.log("entered in main");
         
         session.conversationData.mainEntry = session.message.text ;  //starting para of the user
         
@@ -253,15 +318,16 @@ bot.dialog('/main', [
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
-    function (session, args, next) {
+    function (session, results, next) {
         
-        session.conversationData.mainPrompt = args.response;//why is this not getting any text ?
+        session.conversationData.mainPrompt = results.response;//why is this not getting any text ?
         
-        session.sendTyping();
+        //session.sendTyping();
         
         //session.send("You selected option:"+session.conversationData.mainPrompt);
-        
-        if (args.response) {
+        //console.log("line241------------"+results.response);
+		
+        if (results.response) {
             // var intents_in_resp = results.response.intents;
             // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
             //     session.endDialog("Thanks for using. You can chat again by saying Hi");
@@ -285,10 +351,9 @@ bot.dialog('/main', [
 
             session.conversationData.mainBool = false;
 
-            switch (args.response.entity) {
+            switch (results.response.entity) {
                 case "Proper Noun <Entities>":
                     //term to info
-
                     //call a JS in the source here
                     //session.send("Proper Noun case detected");
 
@@ -302,7 +367,7 @@ bot.dialog('/main', [
                 case "Current info <News>":
 
                     //News API, terms  
-                    session.send("Current info case detected");  
+                    //session.send("Current info case detected");  
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
                     // }
@@ -311,7 +376,7 @@ bot.dialog('/main', [
                 case "People also search for <Recommendations/Similar>":
 
                     //bing search recommnedation api 
-                    session.send("People also search for case detected");
+                    //session.send("People also search for case detected");
                     
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -321,7 +386,7 @@ bot.dialog('/main', [
                     break;
                 case "Scientific Domain <Academica>":
                     
-                    session.send("Scientific domain case detected");
+                    //session.send("Scientific domain case detected");
                     //academic api
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -330,7 +395,7 @@ bot.dialog('/main', [
                     break;
                 case "Term-Definition <Meaning>":
                     //oxford api
-                    session.send("Term defination case detected");
+                    //session.send("Term defination case detected");
                    
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -338,7 +403,7 @@ bot.dialog('/main', [
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
-                    session.send("External search engine links requested");
+                    //session.send("External search engine links requested");
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
                     // }
@@ -354,30 +419,31 @@ bot.dialog('/main', [
                 //     session.replaceDialog('/more')
                 //PUSH IT INTO A GENERIC SEARCH OR MORE CASE 
             }   
-            session.send('You are after the switch case in main');
+            //session.send('You are after the switch case in main');
             // }
         }
         else {
-            session.endDialog("Invalid Response. You can start again by texting the paragraph you want to analyze.\n\nWe'll automatically extract the keywords");
+            session.endDialog();
         }
-        next();
-    },
-    function (session, args,next) {
-        // The menu runs a loop until the user chooses to (quit).
-        builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
-    },
-    function (session, results) {
-        // The menu runs a loop until the user chooses to (quit).
-        // session.conversationData.moreBool = results.response;
+        //next();
+    }
+	// ,
+    // function (session, args,next) {
+        // // The menu runs a loop until the user chooses to (quit).
+        // builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
+    // },
+    // function (session, results) {
+        // // The menu runs a loop until the user chooses to (quit).
+        // // session.conversationData.moreBool = results.response;
         
-        //CHECK SYNTAX BELOW
-        if (results.response == true ){
-            session.replaceDialog('/more');
-        }
-        else{
-            session.replaceDialog('/exit');
-        }
-    }    
+        // //CHECK SYNTAX BELOW
+        // if (results.response == true ){
+            // session.replaceDialog('/more');
+        // }
+        // else{
+            // session.replaceDialog('/exit');
+        // }
+    // }    
 ]);
 
 
@@ -408,7 +474,7 @@ bot.dialog('/properNoun', [
         // triggerAction({ matches: /^(show|list)/i });
 
         //generic callback
-        session.send('In proper noun dialogue.');
+        //session.send('In proper noun dialogue.');
         var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
         var listCar=[] ;
 		var numW = 0;
@@ -455,32 +521,65 @@ bot.dialog('/properNoun', [
         next();
     },
     function (session, results) {
-        session.send("Proper Noun dialogue has ended but wait for API call to finish!");
+        //session.send("Proper Noun dialogue has ended but wait for API call to finish!");
         session.endDialog();
     }
 ]);
 
 bot.dialog('/current', [
     function (session, args, next) {
-        session.send('In current news dialogue.');
-        
-
+        //session.send('In current news dialogue.');
+        var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
+        var listCar=[] ;
+		var numW = 0;
+        var answerJSON;
+		
+		
+		
         function callbackNewsWords(jsonArrNewsWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonArrNewsWords);
+                //session.send("The key word was: " + oquery);
+				numW++;
+				//session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
+				dict = jsonArrNewsWords["results"][0]; 
+				//console.log(dict);
+				listCar.push( new builder.HeroCard(session)
+						.title(dict['name'])
+						.subtitle(dict['url'])
+						.text(dict['description']));
+						
+				if(oquery == lastQueryNoun){
+					delayer(numW,function (){//this function will be automatically delayed
+                        var msg = new builder.Message(session);
+                        msg.attachmentLayout(builder.AttachmentLayout.carousel);
+                        msg.attachments(listCar);
+                        session.send(msg);
+                    });					
+
+                }
             }
             else {
-                session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
-
+                //session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
             }
         }
 
         function callbackNews(jsonArrNews, oquery, stringCode) {
-            if (stringCode == "success") {
-                session.send("The original query was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonArrNews);
+            if (stringCode == "success" && JSON.stringify(jsonArrNews["results"])!="[]") {
+                //session.send("The original query was: " + oquery);
+				dict = jsonArrNews["results"][0];
+				var solocard = new builder.HeroCard(session)
+						.title(dict['name'])
+						.subtitle(dict['url'])
+						.text(dict['description']);
+				delayer(1,function (){//this function will be automatically delayed
+					var msg = new builder.Message(session);
+					msg.attachmentLayout(builder.AttachmentLayout.carousel);
+					msg.attachments(listCar);
+					session.send(msg);
+				});
             }
             else {
-                session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
+                //session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
                 for (i in session.conversationData.terms) {
 
                     try {
@@ -506,7 +605,7 @@ bot.dialog('/current', [
         next();
     },
     function (session, results) {
-        session.send("Current Info dialogue has ended but wait for API call to finish!");
+        //session.send("Current Info dialogue has ended but wait for API call to finish!");
         session.endDialog();
     }
 ]);
@@ -518,7 +617,7 @@ bot.dialog('/similar', [
         
         function callbackSimilarWords(jsonDataSimilarWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonDataSimilarWords);
+                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + JSON.stringify(jsonDataSimilarWords));
             }
             else {
                 session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by Bing RecommededSearchAPI. ");
@@ -629,22 +728,29 @@ bot.dialog('/acad', [
 bot.dialog('/meaning', [
     function (session, args, next) {
 
-        session.send("You are in the meaning dialogue");
+        //session.send("You are in the meaning dialogue");
 
         function callbackOxfordAPI(resultOxfordAPI,origWord,stringCode) {//this is by call back function from which i want a promise to be returned
             if(stringCode == "success"){
-                session.send("Your word was : "+ origWord + ".\n\nResults found by Oxford API are : \n\n"+resultOxfordAPI);
+                //session.send("Your word was : "+ origWord + ".\n\nResults found by Oxford API are : \n\n"+resultOxfordAPI);
             }
             else{
-                session.send("Your word was : " + origWord + ".\n\nNo results found by Oxford API. Error String : \n\n" + stringCode);
+                //session.send("Your word was : " + origWord + ".\n\nNo results found by Oxford API. Error String : \n\n" + stringCode);
             }
         }
-
-        for (i in session.conversationData.terms) {
+		
+		var listWord = [];
+		
+		
+        for (j in session.conversationData.terms) {
+			listWord.concat(session.conversationData.terms[j].split(" "));
+        }
+		
+        for (i in listWord) {
 
             try {
                 // var resolveTrue = false
-                oxf.get_meaning(session.conversationData.terms[i], callbackOxfordAPI);
+                oxf.get_meaning(listWord[i], callbackOxfordAPI);
             }
             catch (e) {
                 console.log("" + e);
@@ -652,7 +758,7 @@ bot.dialog('/meaning', [
         }
     },
     function (session, results) {
-        session.send("Meaning Dialogue has ended but wait for the API call to finish and fetch results");
+        //session.send("Meaning Dialogue has ended but wait for the API call to finish and fetch results");
         session.endDialog();
     }
 ]);

@@ -55,31 +55,37 @@ let getRealData = function (documents, func) {
 			//let body__ = body_['documents'][0]['keyPhrases'];
              //let body1 = JSON.stringify (body, null, '  ');
             var finmessage = "";
-            // try{
+            var imJSON = {};
+            imJSON["regions"]= [];
+            try{
                 var regionsarr = findata["regions"]
                 var numregions = regionsarr.length;
                 for(var i=0;i<numregions;i++){
                     var thisregion = regionsarr[i];
                     var linearr = thisregion["lines"];
                     var numlinearr = linearr.length;
+                    imJSON["regions"][i]={};
+                    imJSON["regions"][i]["lines"] = [];
                     for(var j=0;j<numlinearr;j++){
                         var thisline =linearr[j];
                         var wordarr = thisline["words"];
+                        var thislinestring = "";
                         var numwords = wordarr.length;
                         for(var k=0;k<numwords;k++){
                             finmessage += wordarr[k]["text"] +" ";
-
+                            thislinestring += wordarr[k]["text"]+" ";
+                            imJSON["regions"][i]["lines"][j]= thislinestring;
                         }
                         finmessage += "\n\n";
 
                     }
                     finmessage += "---------------------------"+ "\n\n";
                 }
-            // }catch(e){
-            //     finmessage = "Some error, try again later";
-            // }
+            }catch(e){
+                finmessage = "Some error, try again later";
+            }
                
-			func(finmessage);
+			func(imJSON, finmessage);
 		});
 		response.on ('error', function (e) {
 			console.log("" + e);
@@ -97,9 +103,10 @@ module.exports = {
 }
 
 // getImageData("http://bsw.iitd.ac.in/temp/textwaaliimg.JPG",
-//     function(enddat){
-//         console.log(enddat);
-//     }); 
+    // function(endJSON, endtext){
+        // console.log(JSON.stringify(endJSON, null, '  '));
+        // console.log(endtext);
+    // }); 
 
 
 

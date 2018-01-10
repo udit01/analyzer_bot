@@ -33,21 +33,16 @@ let get_meaning = function (inp, func1) {
         response.on('end', function () {
             try{
                 var reqJson = JSON.parse(body);
-            }
-            catch(e){
-                console.log(""+e);
-            }
-            var rootWord = "";
-            //extract the keyword here 
-            // [0] because all are arrays
-            var lexEntryVal = reqJson['results'][0]['lexicalEntries'][0];
-            // console.log(JSON.stringify(reqJson));
-            // console.log("Line 44:" +JSON.stringify(reqJson['results']));
+				var rootWord = "";
+				//extract the keyword here 
+				// [0] because all are arrays
+				var lexEntryVal = reqJson['results'][0]['lexicalEntries'][0];
+				// console.log(JSON.stringify(reqJson));
+				// console.log("Line 44:" +JSON.stringify(reqJson['results']));
+				rootWord = lexEntryVal['inflectionOf'][0]['id'] ;
+					//or can use 'word'
 
-            try{
-                rootWord = lexEntryVal['inflectionOf'][0]['id'] ;
-                //or can use 'word'
-            }
+					}
             catch(e){
                 rootWord = inp;
                 console.log(""+e);
@@ -93,19 +88,24 @@ let getOxfordData=function(inp,funcThoughRoot){
                 var reqJson = JSON.parse(body);
 
                 var finjson = JSON.stringify(reqJson, null, '  ');
+                // console.log(finjson);
                 // console.log("Root detected LINE87: "+inp);
                 var lexicalentries = reqJson["results"][0]["lexicalEntries"];
                 var lengthlexicalentries = lexicalentries.length;
-            
+                var oxJSON = {};
+                oxJSON["types"] = [];
                 
                 //
                 for(var i=0;i<lengthlexicalentries;i++){
                     var lexicalcategory = lexicalentries[i]["lexicalCategory"];
-                    findata += "Lexical Category: "  + lexicalcategory+ "\n\n";
+                    oxJSON["types"][i] = {};
+                    oxJSON["types"][i]["lexicalCategory"] = lexicalentries[i]["lexicalCategory"];
+                    //findata += "Lexical Category: "  + lexicalcategory+ "\n\n";
                     // console.log("lexcat was "+i);
                     var entries = lexicalentries[i]["entries"];
                     var numentries = entries.length;
                     var numdef =0;
+                    oxJSON["types"][i]["diffDefinitions"] = [];
                     for(var j=0;j<numentries;j++){
                         var thisentry = entries[j];
                         var sensesarr = thisentry["senses"];
@@ -116,13 +116,16 @@ let getOxfordData=function(inp,funcThoughRoot){
                             try{
                                 var definition = thissense["definitions"][0];
                                 numdef++;
-                                findata += "Definition "+numdef+": "+definition +"\n\n";
+                                oxJSON["types"][i]["diffDefinitions"][numdef-1] = {};
+                                oxJSON["types"][i]["diffDefinitions"][numdef-1]["definition"] =  thissense["definitions"][0];
+                               // findata += "Definition "+numdef+": "+definition +"\n\n";
                                 try{
                                     var examples= thissense["examples"][0]["text"];
-                                    findata += "Example: "+ examples + "\n\n";
+                                    oxJSON["types"][i]["diffDefinitions"][numdef-1]["example"] = thissense["examples"][0]["text"];
+                                    //findata += "Example: "+ examples + "\n\n";
                                 }catch(e){
                                     // console.log("cant find example");
-                                    findata += "\n";
+                                    //findata += "\n";
 
                                 }
                             }catch(e){
@@ -133,7 +136,7 @@ let getOxfordData=function(inp,funcThoughRoot){
                             
                         }
                     }
-                    findata+= "----------------------"+"\n\n";
+                    //findata+= "----------------------"+"\n\n";
                 }
             }
             catch(e){
@@ -141,7 +144,7 @@ let getOxfordData=function(inp,funcThoughRoot){
                 stringCode = "Coundn't find meaning on API CALL or response was HTML";
             }
 
-            funcThoughRoot(findata,inp,stringCode);
+            funcThoughRoot(oxJSON,inp,stringCode);
             
         });
         response.on('error', function (e) {
@@ -158,7 +161,3 @@ module.exports = {
 }
 
 //made for debugging
-// getOxfordData("set",
-//     function(enddat){
-//         console.log(enddat);
-//     }); 
