@@ -54,7 +54,7 @@ var t2i = require('./src/term2info');
 var t2a = require('./src/term2academic');
 var bs = require('./src/bingSearch');
 var t2n = require('./src/bingNewsSearch');
-var t2m = require('./src/oxfordSearch');
+var oxf = require('./src/oxfordSearch');
 var brs = require('./src/bingRelatedSearch');
 var bns = require('./src/bingNewsSearch');
 var i2t = require('./src/url2image');
@@ -179,9 +179,10 @@ bot.dialog('/main', [
             session.conversationData.boolTermsAPI = false;
             // uncomment to get back the terms data
             tc.get_terms_combined(session.conversationData.mainEntry,
-                function (jsonarr) {
+                function (jsonarr) {//THE CALLBACK
                     session.conversationData.terms = jsonarr;
                     session.send("The key terms TextAnalytics/Linguistic API are :" + session.conversationData.terms);
+                    session.conversationData.boolTermsAPI = true;
 
             });
 
@@ -225,10 +226,6 @@ bot.dialog('/main', [
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
-    // function (session, args, next) {
-    //     //experimental
-    //     // term = args;
-    // },
     function (session, args, next) {
         
         session.conversationData.mainPrompt = args.response;//why is this not getting any text ?
@@ -246,7 +243,7 @@ bot.dialog('/main', [
             
             //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
 
-            //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
+            //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA    //DONE
             
             //below is the code to print the searched data
             // PASS APPENDED KEYWORDS INTO THE BING SEARCH
@@ -259,6 +256,7 @@ bot.dialog('/main', [
             
             // session.conversationData.boolBingSearchAPI = false;
 
+            session.conversationData.mainBool = false;
 
             switch (args.response.entity) {
                 case "Proper Noun <Entities>":
@@ -267,9 +265,9 @@ bot.dialog('/main', [
                     //call a JS in the source here
                     session.send("Proper Noun case detected");
 
-                    while (!session.conversationData.boolTermsAPI){
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI){
+                    //     //waiting for being true
+                    // }
                     //now begin that dialogue
                     //call the proper noun dialogue with session.begin
                     session.beginDialog('/properNoun');//With what data ?
@@ -278,9 +276,9 @@ bot.dialog('/main', [
 
                     //News API, terms  
                     session.send("Current info case detected");  
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     session.beginDialog('/current');                  
                     break;
                 case "People also search for <Recommendations/Similar>":
@@ -288,9 +286,9 @@ bot.dialog('/main', [
                     //bing search recommnedation api 
                     session.send("People also search for case detected");
                     
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     
                     session.beginDialog('/similar');                                      
                     break;
@@ -298,28 +296,25 @@ bot.dialog('/main', [
                     
                     session.send("Scientific domain case detected");
                     //academic api
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     session.beginDialog('/acad');                                      
                     break;
-                case "Term-Defination <Meaning>":
-                    //call a JS in the source here//and the displayer
+                case "Term-Definition <Meaning>":
                     //oxford api
-                    //do something dictionary meaning ?
-
                     session.send("Term defination case detected");
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                   
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
-                
                     session.send("External search engine links requested");
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     session.beginDialog('/more');
                 case "Help":
                     //do i want the help dialogue to return here ?
@@ -336,12 +331,13 @@ bot.dialog('/main', [
             // }
         }
         else {
-            session.endDialog("Invalid Response. You can start again by texting the paragraph you want to analyze");
+            session.endDialog("Invalid Response. You can start again by texting the paragraph you want to analyze.\n\nWe'll automatically extract the keywords");
         }
+        next();
     },
     function (session, args,next) {
         // The menu runs a loop until the user chooses to (quit).
-        builder.Prompts.confirm(session,"Do you want some more external links to the common search enginers ? ");
+        builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
     },
     function (session, results) {
         // The menu runs a loop until the user chooses to (quit).
@@ -351,7 +347,9 @@ bot.dialog('/main', [
         if (results.response == true ){
             session.replaceDialog('/more');
         }
-        session.endDialog();
+        else{
+            session.replaceDialog('/exit');
+        }
     }    
 ]);
 
@@ -359,18 +357,60 @@ bot.dialog('/main', [
 //below dialogue calls the JS and prettifies the output
 bot.dialog('/properNoun', [
     function (session, args, next) {
+            // var msg = new builder.Message(session);
+            // msg.attachmentLayout(builder.AttachmentLayout.carousel)
+            // msg.attachments([
+            //     new builder.HeroCard(session)
+            //         .title("Classic White T-Shirt")
+            //         .subtitle("100% Soft and Luxurious Cotton")
+            //         .text("Price is $25 and carried in sizes (S, M, L, and XL)")
+            //         .images([builder.CardImage.create(session, 'http://petersapparel.parseapp.com/img/whiteshirt.png')])
+            //         .buttons([
+            //             builder.CardAction.imBack(session, "buy classic white t-shirt", "Buy")
+            //         ]),
+            //     new builder.HeroCard(session)
+            //         .title("Classic Gray T-Shirt")
+            //         .subtitle("100% Soft and Luxurious Cotton")
+            //         .text("Price is $25 and carried in sizes (S, M, L, and XL)")
+            //         .images([builder.CardImage.create(session, 'http://petersapparel.parseapp.com/img/grayshirt.png')])
+            //         .buttons([
+            //             builder.CardAction.imBack(session, "buy classic gray t-shirt", "Buy")
+            //         ])
+            // ]);
+            // session.send(msg);
+        // triggerAction({ matches: /^(show|list)/i });
+
         //generic callback
         session.send('In proper noun dialogue.');
-        
+        var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
+        var listCar=[] ;
         function callbackTerms2Info(jsonDataNoun,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success"){
                 session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
             }
             else{
-                // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
+                session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
+            dict = jsonDataNoun[0];   
+            listCar +=  new builder.HeroCard(session)
+                    .title(dict['name'])
+                    .subtitle(dict['url'])
+                    .text(dict['description'])
+                    .images([builder.CardImage.create(session, dict['image'])])
+                    .buttons([
+                        builder.CardAction.imBack(session, "test button", "Do")]);
+                    
+            if(oquery == lastQueryNoun){
+                var msg = new builder.Message(session);
+
+                msg.attachmentLayout(builder.AttachmentLayout.carousel);
+                msg.attachments(listCar);
+                session.send(msg);
+            }
+            
             // resolveTrue = true;
         }
+        
         for(i in session.conversationData.terms){    
 
             try {
@@ -504,6 +544,10 @@ bot.dialog('/acad', [
     function (session, args, next) {
         session.send("In Academic dialogue");
         //you can search for whole in the acad
+        var acadBool = false ;
+        var lastIndexAcad = session.conversationData.terms.length - 1;
+        var lastQuery = session.conversationData.terms[lastIndexAcad]
+
         function callbackTerms2Acad(jsonDataAcad, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             
             if (stringCode == "success") {
@@ -512,8 +556,13 @@ bot.dialog('/acad', [
             else {
                 // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
+            if(oquery == lastQuery){
+                acadBool = true;
+            }
             // resolveTrue = true;
         }
+
+    
         for (i in session.conversationData.terms) {
 
             try {
@@ -524,6 +573,20 @@ bot.dialog('/acad', [
                 console.log("" + e);
             }
         }
+        // function sleepC(ms) {
+        //     return new Promise(resolve => setTimeout(resolve, ms));
+        // }
+
+        // async function demo() {
+        //     console.log('Taking a break...');
+        //     await sleepC(10000);
+        //     console.log('Ten second later');
+        // }
+
+        // demo();
+        // while(!acadBool){
+        //     //
+        // }
         next();
     },
     function (session, results) {
@@ -534,10 +597,31 @@ bot.dialog('/acad', [
 
 bot.dialog('/meaning', [
     function (session, args, next) {
-        //call some API in the src directory with the conversation data you have
+
+        session.send("You are in the meaning dialogue");
+
+        function callbackOxfordAPI(resultOxfordAPI,origWord,stringCode) {//this is by call back function from which i want a promise to be returned
+            if(stringCode == "success"){
+                session.send("Your word was : "+ origWord + ".\n\nResults found by Oxford API are : \n\n"+resultOxfordAPI);
+            }
+            else{
+                session.send("Your word was : " + origWord + ".\n\nNo results found by Oxford API. Error String : \n\n" + stringCode);
+            }
+        }
+
+        for (i in session.conversationData.terms) {
+
+            try {
+                // var resolveTrue = false
+                oxf.get_meaning(session.conversationData.terms[i], callbackOxfordAPI);
+            }
+            catch (e) {
+                console.log("" + e);
+            }
+        }
     },
     function (session, results) {
-
+        session.send("Meaning Dialogue has ended but wait for the API call to finish and fetch results");
         session.endDialog();
     }
 ]);

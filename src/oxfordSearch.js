@@ -1,83 +1,151 @@
-//to be done
 'use strict';
 
 let https = require('https');
 let app_id = process.env.OXFORDAPPID;
 let app_key = process.env.OXFORDAPPKEY;
-//let subscriptionKey = process.env.BingSearchAPIKey;
-//let host = 'od-api.oxforddictionaries.com/api/v1';
-let path = '/api/v1/entries/en';
+// let host = 'od-api.oxforddictionaries.com/api/v1';
+let pathFinal = '/api/v1/entries/en';
+let pathFindRoot = "/api/v1/inflections/en";
 
 //set the max number of results
 //var maxresults=10;
 
-let getOxfordData=function(inp,func1){
-    
-    console.log('Searching oxford searches the Web for: ' + inp);
+//this function fill get the root word then the whole data
+let get_meaning = function (inp, func1) {
+
+    // console.log('Searching oxford searches the Web for: ' + inp);
     let request_params = {
         method: 'GET',
         hostname: "od-api.oxforddictionaries.com",
-        path: path +'/'+ encodeURI(inp),
+        path: pathFindRoot + '/' + encodeURI(inp),
         headers: {
             "Accept": "application/json",
             "app_id": app_id,
             "app_key": app_key
         }
     };
-    console.log("lets see");
-    let req = https.request(request_params, function(response){
+    // console.log("lets see");
+    let req = https.request(request_params, function (response) {
         let body = '';
-        console.log("dekho bhai");
         response.on('data', function (d) {
             body += d;
         });
         response.on('end', function () {
-            var reqJson = JSON.parse(body);
-            var finjson = JSON.stringify(reqJson, null, '  ');
-            console.log(finjson);
-            var lexicalentries = reqJson["results"][0]["lexicalEntries"];
-            var lengthlexicalentries = lexicalentries.length;
+            try{
+                var reqJson = JSON.parse(body);
+            }
+            catch(e){
+                console.log(""+e);
+            }
+            var rootWord = "";
+            //extract the keyword here 
+            // [0] because all are arrays
+            var lexEntryVal = reqJson['results'][0]['lexicalEntries'][0];
+            // console.log(JSON.stringify(reqJson));
+            // console.log("Line 44:" +JSON.stringify(reqJson['results']));
+
+            try{
+                rootWord = lexEntryVal['inflectionOf'][0]['id'] ;
+                //or can use 'word'
+            }
+            catch(e){
+                rootWord = inp;
+                console.log(""+e);
+            }
+            
+            getOxfordData(rootWord,func1);                
+
+        });
+        response.on('error', function (e) {
+            console.log("" + e);
+        });
+
+    });
+    //req.write(body);
+    req.end();
+}
+
+let getOxfordData=function(inp,funcThoughRoot){
+    
+    let request_params = {
+        method: 'GET',
+        hostname: "od-api.oxforddictionaries.com",
+        path: pathFinal +'/'+ encodeURI(inp),
+        headers: {
+            "Accept": "application/json",
+            "app_id": app_id,
+            "app_key": app_key
+        }
+    };
+    // console.log("lets see");
+    let req = https.request(request_params, function(response){
+        let body = '';
+        // console.log("dekho bhai");
+        response.on('data', function (d) {
+            body += d;
+        });
+        response.on('end', function () {
+            // console.log("---this is"+body);
             var findata = "";
-            for(var i=0;i<lengthlexicalentries;i++){
-                var lexicalcategory = lexicalentries[i]["lexicalCategory"];
-                findata += "Lexical Category: "  + lexicalcategory+ "\n\n";
-                console.log("lexcat was "+i);
-                var entries = lexicalentries[i]["entries"];
-                var numentries = entries.length;
-                var numdef =0;
-                for(var j=0;j<numentries;j++){
-                    var thisentry = entries[j];
-                    var sensesarr = thisentry["senses"];
-                    var numsenses = sensesarr.length;
-                    
-                    for(var k=0;k<numsenses;k++){
-                        var thissense = sensesarr[k];
-                        try{
-                            var definition = thissense["definitions"][0];
-                            numdef++;
-                            findata += "Definition "+numdef+": "+definition +"\n\n";
+            var stringCode = "success";
+
+            try{
+                var reqJson = JSON.parse(body);
+
+                var finjson = JSON.stringify(reqJson, null, '  ');
+                // console.log("Root detected LINE87: "+inp);
+                var lexicalentries = reqJson["results"][0]["lexicalEntries"];
+                var lengthlexicalentries = lexicalentries.length;
+            
+                
+                //
+                for(var i=0;i<lengthlexicalentries;i++){
+                    var lexicalcategory = lexicalentries[i]["lexicalCategory"];
+                    findata += "Lexical Category: "  + lexicalcategory+ "\n\n";
+                    // console.log("lexcat was "+i);
+                    var entries = lexicalentries[i]["entries"];
+                    var numentries = entries.length;
+                    var numdef =0;
+                    for(var j=0;j<numentries;j++){
+                        var thisentry = entries[j];
+                        var sensesarr = thisentry["senses"];
+                        var numsenses = sensesarr.length;
+                        
+                        for(var k=0;k<numsenses;k++){
+                            var thissense = sensesarr[k];
                             try{
-                                var examples= thissense["examples"][0]["text"];
-                                findata += "Example: "+ examples + "\n\n";
+                                var definition = thissense["definitions"][0];
+                                numdef++;
+                                findata += "Definition "+numdef+": "+definition +"\n\n";
+                                try{
+                                    var examples= thissense["examples"][0]["text"];
+                                    findata += "Example: "+ examples + "\n\n";
+                                }catch(e){
+                                    // console.log("cant find example");
+                                    findata += "\n";
+
+                                }
                             }catch(e){
-                                console.log("cant find example");
-                                findata += "\n";
+                                console.log(""+e);
+                                stringCode = "Defination not found for" + inp;
                             }
-                        }catch(e){
-                            console.log("defintion found for this one");
+                            
+                            
                         }
-                        
-                        
                     }
+                    findata+= "----------------------"+"\n\n";
                 }
-                findata+= "----------------------"+"\n\n";
+            }
+            catch(e){
+                console.log(""+e);
+                stringCode = "Coundn't find meaning on API CALL or response was HTML";
             }
 
-            func1(findata);
+            funcThoughRoot(findata,inp,stringCode);
             
         });
         response.on('error', function (e) {
-            console.log('Error: ' + e.message);
+            console.log(""+e);
         });
 
     });
@@ -85,11 +153,12 @@ let getOxfordData=function(inp,func1){
     req.end();
 }
 module.exports = {
-    'getOxfordData' : getOxfordData
+    'getOxfordData' : getOxfordData,
+    'get_meaning': get_meaning
 }
 
 //made for debugging
-getOxfordData("set",
-    function(enddat){
-        console.log(enddat);
-    }); 
+// getOxfordData("set",
+//     function(enddat){
+//         console.log(enddat);
+//     }); 
