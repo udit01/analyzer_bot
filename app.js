@@ -233,9 +233,9 @@ bot.dialog('/main', [
                     //call a JS in the source here
                     session.send("Proper Noun case detected");
 
-                    while (!session.conversationData.boolTermsAPI){
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI){
+                    //     //waiting for being true
+                    // }
                     //now begin that dialogue
                     //call the proper noun dialogue with session.begin
                     session.beginDialog('/properNoun');//With what data ?
@@ -244,9 +244,9 @@ bot.dialog('/main', [
 
                     //News API, terms  
                     session.send("Current info case detected");  
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     session.beginDialog('/current');                  
                     break;
                 case "People also search for <Recommendations/Similar>":
@@ -254,9 +254,9 @@ bot.dialog('/main', [
                     //bing search recommnedation api 
                     session.send("People also search for case detected");
                     
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     
                     session.beginDialog('/similar');                                      
                     break;
@@ -264,25 +264,25 @@ bot.dialog('/main', [
                     
                     session.send("Scientific domain case detected");
                     //academic api
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     session.beginDialog('/acad');                                      
                     break;
                 case "Term-Definition <Meaning>":
                     //oxford api
                     session.send("Term defination case detected");
                    
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
                     session.send("External search engine links requested");
-                    while (!session.conversationData.boolTermsAPI) {
-                        //waiting for being true
-                    }
+                    // while (!session.conversationData.boolTermsAPI) {
+                    //     //waiting for being true
+                    // }
                     session.beginDialog('/more');
                 case "Help":
                     //do i want the help dialogue to return here ?
@@ -470,17 +470,25 @@ bot.dialog('/acad', [
     function (session, args, next) {
         session.send("In Academic dialogue");
         //you can search for whole in the acad
+        var acadBool = false ;
+        var lastIndexAcad = session.conversationData.terms.length - 1;
+        var lastQuery = session.conversationData.terms[lastIndexAcad]
+
         function callbackTerms2Acad(jsonDataAcad, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             
-            console.log(oquery)
             if (stringCode == "success") {
                 session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataAcad);
             }
             else {
                 // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
+            if(oquery == lastQuery){
+                acadBool = true;
+            }
             // resolveTrue = true;
         }
+
+    
         for (i in session.conversationData.terms) {
 
             try {
@@ -491,6 +499,20 @@ bot.dialog('/acad', [
                 console.log("" + e);
             }
         }
+        // function sleepC(ms) {
+        //     return new Promise(resolve => setTimeout(resolve, ms));
+        // }
+
+        // async function demo() {
+        //     console.log('Taking a break...');
+        //     await sleepC(10000);
+        //     console.log('Ten second later');
+        // }
+
+        // demo();
+        // while(!acadBool){
+        //     //
+        // }
         next();
     },
     function (session, results) {
