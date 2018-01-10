@@ -320,7 +320,7 @@ bot.dialog('/main', [
         //session.sendTyping();
         
         //session.send("You selected option:"+session.conversationData.mainPrompt);
-        console.log("line241------------"+results.response);
+        //console.log("line241------------"+results.response);
 		
         if (results.response) {
             // var intents_in_resp = results.response.intents;
@@ -362,7 +362,7 @@ bot.dialog('/main', [
                 case "Current info <News>":
 
                     //News API, terms  
-                    session.send("Current info case detected");  
+                    //session.send("Current info case detected");  
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
                     // }
@@ -371,7 +371,7 @@ bot.dialog('/main', [
                 case "People also search for <Recommendations/Similar>":
 
                     //bing search recommnedation api 
-                    session.send("People also search for case detected");
+                    //session.send("People also search for case detected");
                     
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -381,7 +381,7 @@ bot.dialog('/main', [
                     break;
                 case "Scientific Domain <Academica>":
                     
-                    session.send("Scientific domain case detected");
+                    //session.send("Scientific domain case detected");
                     //academic api
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -390,7 +390,7 @@ bot.dialog('/main', [
                     break;
                 case "Term-Definition <Meaning>":
                     //oxford api
-                    session.send("Term defination case detected");
+                    //session.send("Term defination case detected");
                    
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
@@ -398,7 +398,7 @@ bot.dialog('/main', [
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
-                    session.send("External search engine links requested");
+                    //session.send("External search engine links requested");
                     // while (!session.conversationData.boolTermsAPI) {
                     //     //waiting for being true
                     // }
@@ -414,30 +414,31 @@ bot.dialog('/main', [
                 //     session.replaceDialog('/more')
                 //PUSH IT INTO A GENERIC SEARCH OR MORE CASE 
             }   
-            session.send('You are after the switch case in main');
+            //session.send('You are after the switch case in main');
             // }
         }
         else {
             session.endDialog();
         }
         //next();
-    },
-    function (session, args,next) {
-        // The menu runs a loop until the user chooses to (quit).
-        builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
-    },
-    function (session, results) {
-        // The menu runs a loop until the user chooses to (quit).
-        // session.conversationData.moreBool = results.response;
+    }
+	// ,
+    // function (session, args,next) {
+        // // The menu runs a loop until the user chooses to (quit).
+        // builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
+    // },
+    // function (session, results) {
+        // // The menu runs a loop until the user chooses to (quit).
+        // // session.conversationData.moreBool = results.response;
         
-        //CHECK SYNTAX BELOW
-        if (results.response == true ){
-            session.replaceDialog('/more');
-        }
-        else{
-            session.replaceDialog('/exit');
-        }
-    }    
+        // //CHECK SYNTAX BELOW
+        // if (results.response == true ){
+            // session.replaceDialog('/more');
+        // }
+        // else{
+            // session.replaceDialog('/exit');
+        // }
+    // }    
 ]);
 
 
@@ -468,7 +469,7 @@ bot.dialog('/properNoun', [
         // triggerAction({ matches: /^(show|list)/i });
 
         //generic callback
-        session.send('In proper noun dialogue.');
+        //session.send('In proper noun dialogue.');
         var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
         var listCar=[] ;
 		var numW = 0;
@@ -515,32 +516,65 @@ bot.dialog('/properNoun', [
         next();
     },
     function (session, results) {
-        session.send("Proper Noun dialogue has ended but wait for API call to finish!");
+        //session.send("Proper Noun dialogue has ended but wait for API call to finish!");
         session.endDialog();
     }
 ]);
 
 bot.dialog('/current', [
     function (session, args, next) {
-        session.send('In current news dialogue.');
-        
-
+        //session.send('In current news dialogue.');
+        var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
+        var listCar=[] ;
+		var numW = 0;
+        var answerJSON;
+		
+		
+		
         function callbackNewsWords(jsonArrNewsWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonArrNewsWords);
+                //session.send("The key word was: " + oquery);
+				numW++;
+				//session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
+				dict = jsonArrNewsWords["results"][0]; 
+				//console.log(dict);
+				listCar.push( new builder.HeroCard(session)
+						.title(dict['name'])
+						.subtitle(dict['url'])
+						.text(dict['description']));
+						
+				if(oquery == lastQueryNoun){
+					delayer(numW,function (){//this function will be automatically delayed
+                        var msg = new builder.Message(session);
+                        msg.attachmentLayout(builder.AttachmentLayout.carousel);
+                        msg.attachments(listCar);
+                        session.send(msg);
+                    });					
+
+                }
             }
             else {
-                session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
-
+                //session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
             }
         }
 
         function callbackNews(jsonArrNews, oquery, stringCode) {
-            if (stringCode == "success") {
-                session.send("The original query was: " + oquery + " .\n\n Related information from BingNewsAPI is: " + jsonArrNews);
+            if (stringCode == "success" && JSON.stringify(jsonArrNews["results"])!="[]") {
+                //session.send("The original query was: " + oquery);
+				dict = jsonArrNews["results"][0];
+				var solocard = new builder.HeroCard(session)
+						.title(dict['name'])
+						.subtitle(dict['url'])
+						.text(dict['description']);
+				delayer(1,function (){//this function will be automatically delayed
+					var msg = new builder.Message(session);
+					msg.attachmentLayout(builder.AttachmentLayout.carousel);
+					msg.attachments(listCar);
+					session.send(msg);
+				});
             }
             else {
-                session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
+                //session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
                 for (i in session.conversationData.terms) {
 
                     try {
@@ -566,7 +600,7 @@ bot.dialog('/current', [
         next();
     },
     function (session, results) {
-        session.send("Current Info dialogue has ended but wait for API call to finish!");
+        //session.send("Current Info dialogue has ended but wait for API call to finish!");
         session.endDialog();
     }
 ]);
@@ -578,7 +612,7 @@ bot.dialog('/similar', [
         
         function callbackSimilarWords(jsonDataSimilarWords, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             if (stringCode == "success") {
-                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + jsonDataSimilarWords);
+                session.send("The key word was: " + oquery + " .\n\n Related information from Bing RecommendedSearchAPI is: " + JSON.stringify(jsonDataSimilarWords));
             }
             else {
                 session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by Bing RecommededSearchAPI. ");

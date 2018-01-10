@@ -107,6 +107,11 @@ getImageData("https://scontent-bom1-1.xx.fbcdn.net/v/t1.0-9/26219964_17929970074
         console.log(JSON.stringify(endJSON, null, '  '));
         console.log(endtext);
     }); 
+// getImageData("http://bsw.iitd.ac.in/temp/textwaaliimg.JPG",
+    // function(endJSON, endtext){
+        // console.log(JSON.stringify(endJSON, null, '  '));
+        // console.log(endtext);
+    // }); 
 
 
 
