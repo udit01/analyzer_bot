@@ -1,4 +1,4 @@
-var wordLowerLimit = 4;//broken english if less than this
+var wordLowerLimit = 6;//broken english if less than this
 var wordUpperLimit = 20;
 
 var t2t = require('./text2terms');
@@ -11,9 +11,11 @@ function get_terms_combined(input, callbackTerms){
     
     if ((currentLength <= wordUpperLimit) && (wordLowerLimit <= currentLength)){
         t2n.get_nouns(input,callbackTerms);
+        console.log("Linguistic API used");
     }
     else{
         t2t.get_terms(input,callbackTerms);          
+        console.log("Text Analytic API used");
     }
 }
 
