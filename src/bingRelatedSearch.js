@@ -32,15 +32,19 @@ let getRelatedData=function(inp,func1){
                 var relatedSearchArr = reqJson["relatedSearches"]["value"];
                 var numResults = relatedSearchArr.length;
                 // console.log(numResults);
-                var relatedSearchMessage = '';
+                //var relatedSearchMessage = '';
+                var relatedSearchJSON = {};
+                relatedSearchJSON["description"] = [];
                 // console.log('was executed');
                 // for(var i=0;(i<numResults) && (i<maxRecommendations);i++){
                 for(var i=0; (i<numResults) ;i++){
                     // console.log(i);
                     try{
-                        relatedSearchMessage += relatedSearchArr[i]["displayText"]+ "\n\n";
+                        //relatedSearchMessage += relatedSearchArr[i]["displayText"]+ "\n\n";
+                        relatedSearchJSON["description"].push(relatedSearchArr[i]["displayText"]);
                     }catch(e){
-                        relatedSearchMessage += relatedSearchArr[i]["text"]+"\n\n";
+                        //relatedSearchMessage += relatedSearchArr[i]["text"]+"\n\n";
+                        relatedSearchJSON["description"].push(relatedSearchArr[i]["text"]);
                     }
                 }
                 // console.log("relatedresults being displayed");
@@ -48,7 +52,7 @@ let getRelatedData=function(inp,func1){
                 stringCode = "can't find related searchs";
                 // func1("cant find related searches");
             }
-            func1(relatedSearchMessage, inp ,stringCode);
+            func1(relatedSearchJSON, inp ,stringCode);
             
         });
         response.on('error', function (e) {
@@ -64,6 +68,7 @@ module.exports = {
 }
 
 // getRelatedData("narendra modi",
-//     function(enddat){
-//         console.log(enddat);
+//     function(enddat,inp,stringCode){
+//         console.log("executing");
+//         console.log(JSON.stringify(enddat, null, '  '));
 //     }); 
