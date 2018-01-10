@@ -7,7 +7,7 @@ let https = require ('https');
 // **********************************************
 
 // Replace the subscriptionKey string value with your valid subscription key.
-let subscriptionKey = '815393fdab4e405989982f6588f0e33a';
+let subscriptionKey = process.env.LinguisticsAPIKey;
 
 let host = 'westus.api.cognitive.microsoft.com';
 let path = '/linguistics/v1.0/analyze';

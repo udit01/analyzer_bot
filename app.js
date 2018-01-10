@@ -53,6 +53,8 @@ var tc = require('./src/terms_combine');
 var t2i = require('./src/term2info');
 var t2a = require('./src/term2academic');
 var bs = require('./src/bingSearch');
+var t2n = require('./src/bingNewsSearch');
+var oxf = require('./src/oxfordSearch');
 var brs = require('./src/bingRelatedSearch');
 var bns = require('./src/bingNewsSearch');
 
@@ -176,25 +178,12 @@ bot.dialog('/main', [
             session.conversationData.boolTermsAPI = false;
             // uncomment to get back the terms data
             tc.get_terms_combined(session.conversationData.mainEntry,
-                function (jsonarr) {
+                function (jsonarr) {//THE CALLBACK
                     session.conversationData.terms = jsonarr;
                     session.send("The key terms TextAnalytics/Linguistic API are :" + session.conversationData.terms);
+                    session.conversationData.boolTermsAPI = true;
 
             });
-
-   
-            // session.conversationData.boolTermsAPI = false;
-
-            // function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
-                
-            //     session.conversationData.terms = jsonarr;
-            //     session.send("Your key words detected by us are :" + session.conversationData.terms);
-            //     session.conversationData.boolTermsAPI = true;
-            // }
-            
-            // tc.get_terms(session.conversationData.mainEntry, callback );
-
-
           
         }
         catch (e) {
@@ -205,10 +194,6 @@ bot.dialog('/main', [
         //experimental
         // builder.Prompts.attachment(session, "Upload a picture for me to transform.");
     },
-    // function (session, args, next) {
-    //     //experimental
-    //     // term = args;
-    // },
     function (session, args, next) {
         
         session.conversationData.mainPrompt = args.response;//why is this not getting any text ?
@@ -226,7 +211,7 @@ bot.dialog('/main', [
             
             //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
 
-            //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA
+            //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA    //DONE
             
             //below is the code to print the searched data
             // PASS APPENDED KEYWORDS INTO THE BING SEARCH
@@ -239,6 +224,7 @@ bot.dialog('/main', [
             
             // session.conversationData.boolBingSearchAPI = false;
 
+            session.conversationData.mainBool = false;
 
             switch (args.response.entity) {
                 case "Proper Noun <Entities>":
@@ -283,19 +269,16 @@ bot.dialog('/main', [
                     }
                     session.beginDialog('/acad');                                      
                     break;
-                case "Term-Defination <Meaning>":
-                    //call a JS in the source here//and the displayer
+                case "Term-Definition <Meaning>":
                     //oxford api
-                    //do something dictionary meaning ?
-
                     session.send("Term defination case detected");
+                   
                     while (!session.conversationData.boolTermsAPI) {
                         //waiting for being true
                     }
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
-                
                     session.send("External search engine links requested");
                     while (!session.conversationData.boolTermsAPI) {
                         //waiting for being true
@@ -316,12 +299,13 @@ bot.dialog('/main', [
             // }
         }
         else {
-            session.endDialog("Invalid Response. You can start again by texting the paragraph you want to analyze");
+            session.endDialog("Invalid Response. You can start again by texting the paragraph you want to analyze.\n\nWe'll automatically extract the keywords");
         }
+        next();
     },
     function (session, args,next) {
         // The menu runs a loop until the user chooses to (quit).
-        builder.Prompts.confirm(session,"Do you want some more external links to the common search enginers ? ");
+        builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
     },
     function (session, results) {
         // The menu runs a loop until the user chooses to (quit).
@@ -331,7 +315,9 @@ bot.dialog('/main', [
         if (results.response == true ){
             session.replaceDialog('/more');
         }
-        session.endDialog();
+        else{
+            session.replaceDialog('/exit');
+        }
     }    
 ]);
 
@@ -347,7 +333,7 @@ bot.dialog('/properNoun', [
                 session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
             }
             else{
-                // session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
+                session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
             // resolveTrue = true;
         }
@@ -486,6 +472,7 @@ bot.dialog('/acad', [
         //you can search for whole in the acad
         function callbackTerms2Acad(jsonDataAcad, oquery, stringCode) {//this is by call back function from which i want a promise to be returned
             
+            console.log(oquery)
             if (stringCode == "success") {
                 session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataAcad);
             }
@@ -514,10 +501,31 @@ bot.dialog('/acad', [
 
 bot.dialog('/meaning', [
     function (session, args, next) {
-        //call some API in the src directory with the conversation data you have
+
+        session.send("You are in the meaning dialogue");
+
+        function callbackOxfordAPI(resultOxfordAPI,origWord,stringCode) {//this is by call back function from which i want a promise to be returned
+            if(stringCode == "success"){
+                session.send("Your word was : "+ origWord + ".\n\nResults found by Oxford API are : \n\n"+resultOxfordAPI);
+            }
+            else{
+                session.send("Your word was : " + origWord + ".\n\nNo results found by Oxford API. Error String : \n\n" + stringCode);
+            }
+        }
+
+        for (i in session.conversationData.terms) {
+
+            try {
+                // var resolveTrue = false
+                oxf.get_meaning(session.conversationData.terms[i], callbackOxfordAPI);
+            }
+            catch (e) {
+                console.log("" + e);
+            }
+        }
     },
     function (session, results) {
-
+        session.send("Meaning Dialogue has ended but wait for the API call to finish and fetch results");
         session.endDialog();
     }
 ]);
