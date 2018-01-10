@@ -57,6 +57,10 @@ var t2n = require('./src/bingNewsSearch');
 var oxf = require('./src/oxfordSearch');
 var brs = require('./src/bingRelatedSearch');
 var bns = require('./src/bingNewsSearch');
+var i2t = require('./src/url2image');
+
+// time for one hero card
+var timeOut = 1000;
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -184,6 +188,39 @@ bot.dialog('/main', [
                     session.conversationData.boolTermsAPI = true;
 
             });
+
+   
+            // session.conversationData.boolTermsAPI = false;
+
+            // function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
+                
+            //     session.conversationData.terms = jsonarr;
+            //     session.send("Your key words detected by us are :" + session.conversationData.terms);
+            //     session.conversationData.boolTermsAPI = true;
+            // }
+            
+            // t2t.get_terms(session.conversationData.mainEntry, callback );
+
+            //below code was written to test the src files while not messing with the version of Udit
+//uncomment this to run the image part
+            // session.conversationData.boolTermsAPI = false;
+
+            // function callback(jsondata) {//this is by call back function from which i want a promise to be returned
+                
+            //     session.conversationData.text = jsondata;
+            //     session.send(session.conversationData.text);
+            //     // session.conversationData.terms = jsonarr;
+            //     // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
+            //     // let termPromise = new Promise();
+            //     session.conversationData.boolTermsAPI = true;
+            // }
+            
+            // i2t.getImageData(session.conversationData.mainEntry, callback );
+
+//uncomment till this
+            // tc.get_terms(session.conversationData.mainEntry, callback );
+
+
           
         }
         catch (e) {
@@ -200,7 +237,7 @@ bot.dialog('/main', [
         
         session.sendTyping();
         
-        session.send("You selected option:"+session.conversationData.mainPrompt);
+        //session.send("You selected option:"+session.conversationData.mainPrompt);
         
         if (args.response) {
             // var intents_in_resp = results.response.intents;
@@ -231,7 +268,7 @@ bot.dialog('/main', [
                     //term to info
 
                     //call a JS in the source here
-                    session.send("Proper Noun case detected");
+                    //session.send("Proper Noun case detected");
 
                     // while (!session.conversationData.boolTermsAPI){
                     //     //waiting for being true
@@ -325,18 +362,75 @@ bot.dialog('/main', [
 //below dialogue calls the JS and prettifies the output
 bot.dialog('/properNoun', [
     function (session, args, next) {
+            // var msg = new builder.Message(session);
+            // msg.attachmentLayout(builder.AttachmentLayout.carousel)
+            // msg.attachments([
+            //     new builder.HeroCard(session)
+            //         .title("Classic White T-Shirt")
+            //         .subtitle("100% Soft and Luxurious Cotton")
+            //         .text("Price is $25 and carried in sizes (S, M, L, and XL)")
+            //         .images([builder.CardImage.create(session, 'http://petersapparel.parseapp.com/img/whiteshirt.png')])
+            //         .buttons([
+            //             builder.CardAction.imBack(session, "buy classic white t-shirt", "Buy")
+            //         ]),
+            //     new builder.HeroCard(session)
+            //         .title("Classic Gray T-Shirt")
+            //         .subtitle("100% Soft and Luxurious Cotton")
+            //         .text("Price is $25 and carried in sizes (S, M, L, and XL)")
+            //         .images([builder.CardImage.create(session, 'http://petersapparel.parseapp.com/img/grayshirt.png')])
+            //         .buttons([
+            //             builder.CardAction.imBack(session, "buy classic gray t-shirt", "Buy")
+            //         ])
+            // ]);
+            // session.send(msg);
+        // triggerAction({ matches: /^(show|list)/i });
+
         //generic callback
         session.send('In proper noun dialogue.');
-        
+        var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
+        var listCar=[] ;
+		var numW = 0;
         function callbackTerms2Info(jsonDataNoun,oquery,stringCode) {//this is by call back function from which i want a promise to be returned
-            if (stringCode == "success"){
-                session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
+            if (stringCode != "success"){
+                //session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
             }
             else{
-                session.send("The word was: " + oquery + " .\n\n Related information was not found by Bing Entity Search");
+				numW++;
+				//session.send("The keyword was: " + oquery + " .\n\n Related information is: " + jsonDataNoun);
+				dict = jsonDataNoun[0]; 
+				//console.log(dict);
+				listCar.push( new builder.HeroCard(session)
+						.title(dict['name'])
+						.subtitle(dict['url'])
+						.text(dict['description'])
+						.images([builder.CardImage.create(session, dict['image'])])
+						.buttons([
+							builder.CardAction.imBack(session, "test button", "Do")]));
+						
+				if(oquery == lastQueryNoun){
+					function sleepC(ms) {
+						return new Promise(resolve => setTimeout(resolve, ms));
+					}
+
+					async function demo() {
+						console.log('Taking a break...');
+						await sleepC(numW*timeOut);
+						// console.log('Ten second later');
+						var msg = new builder.Message(session);
+						//session.send("upcoming carousel");
+						msg.attachmentLayout(builder.AttachmentLayout.carousel);
+						msg.attachments(listCar);
+						console.log("Line 410--------------------"+listCar.length);
+						session.send(msg);
+					}
+
+					demo();
+					
+				}
             }
             // resolveTrue = true;
         }
+        
         for(i in session.conversationData.terms){    
 
             try {

@@ -38,39 +38,45 @@ let entity_search = function (args, func) {
     let req = https.request (request_params, function (response) {
         
         let body = '';
+		// let body__ = "";
         response.on ('data', function (d) {
             body += d;
         });
         response.on ('end', function () {
             let body_ = JSON.parse (body);
+			try {
+				var originalQuery = body_.queryContext.originalQuery;
+				var stringCode = "success";
+				if (body_.entities != undefined && body_.entities.value != undefined){
+					body_ = body_['entities']['value'];
 
-            var originalQuery = body_.queryContext.originalQuery;
-            var stringCode = "success";
-            if (body_.entities != undefined && body_.entities.value != undefined){
-                body_ = body_['entities']['value'];
-
-                for (var i in body_){
-                    delete body_[i].contractualRules;
-                    delete body_[i].webSearchUrl;
-                    delete body_[i].bingId;
-                    delete body_[i].entityPresentationInfo;
-                    try{
-                        body_[i]["image"] = body_[i]["image"]["hostPageUrl"];
-                    }
-                    catch(e){
-                        body_[i]["image"] = "https://upload.wikimedia.org/wikipedia/en/d/d1/Image_not_available.png"
-                    }
-                }
-            }
-            else{
-                stringCode = "Couldn't find by Bing Entity Search";
-                body_ = body_.queryContext;
-            }
-            let body__ = JSON.stringify (body_, null, '  ');
+					for (var i in body_){
+						delete body_[i].contractualRules;
+						delete body_[i].webSearchUrl;
+						delete body_[i].bingId;
+						delete body_[i].entityPresentationInfo;
+						try{
+							body_[i]["image"] = body_[i]["image"]["hostPageUrl"];
+						}
+						catch(e){
+							body_[i]["image"] = "https://upload.wikimedia.org/wikipedia/en/d/d1/Image_not_available.png"
+						}
+					}
+				}
+				else{
+					stringCode = "Couldn't find by Bing Entity Search";
+					body_ = body_.queryContext;
+				}
+			}
+			catch(e){
+				console.log(""+e);
+				body_ = [];
+			}
+            
             //cleaning up data from json & handling exceptions here.		
             
             // console.log (body__);
-            func(body__, originalQuery,stringCode);
+            func(body_, originalQuery,stringCode);
         });
 
         response.on ('error', function (e) {
