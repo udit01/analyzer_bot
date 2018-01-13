@@ -89,7 +89,7 @@ var t2n = require('./src/bingNewsSearch');
 var oxf = require('./src/oxfordSearch');
 var brs = require('./src/bingRelatedSearch');
 var bns = require('./src/bingNewsSearch');
-var i2t = require('./src/url2image');
+// var i2t = require('./src/url2image');
 
 // time for one hero card
 var timeOut = 1000;
@@ -155,7 +155,7 @@ var introMessage = ['I help to find relevant information both current and all-ti
     'Deveoped by :-\n\n Udit Jain, Soumya Sharma, Akshat Khare.'
 ];
 
-var helpMessage = ['This message will contain the usage information how to use.\n\n Next Line'
+var helpMessage = ['This message will contain the usage information how to use.\n\n Please wait a few seconds for me to detect the keyword from your paragraph.'
     // , 'Another Message.'
 ];
 
@@ -271,39 +271,7 @@ bot.dialog('/main', [
 
             });
 
-   
-            // session.conversationData.boolTermsAPI = false;
-
-            // function callback(jsonarr) {//this is by call back function from which i want a promise to be returned
-                
-            //     session.conversationData.terms = jsonarr;
-            //     session.send("Your key words detected by us are :" + session.conversationData.terms);
-            //     session.conversationData.boolTermsAPI = true;
-            // }
-            
-            // t2t.get_terms(session.conversationData.mainEntry, callback );
-
-            //below code was written to test the src files while not messing with the version of Udit
-//uncomment this to run the image part
-            // session.conversationData.boolTermsAPI = false;
-
-            // function callback(jsondata) {//this is by call back function from which i want a promise to be returned
-                
-            //     session.conversationData.text = jsondata;
-            //     session.send(session.conversationData.text);
-            //     // session.conversationData.terms = jsonarr;
-            //     // session.send("Key words detected by TextAnalyticsAPI are : " + session.conversationData.terms);
-            //     // let termPromise = new Promise();
-            //     session.conversationData.boolTermsAPI = true;
-            // }
-            
-            // i2t.getImageData(session.conversationData.mainEntry, callback );
-
-//uncomment till this
-            // tc.get_terms(session.conversationData.mainEntry, callback );
-
-
-          
+           
         }
         catch (e) {
             console.log("" + e);
@@ -323,25 +291,12 @@ bot.dialog('/main', [
         //console.log("line241------------"+results.response);
 		
         if (results.response) {
-            // var intents_in_resp = results.response.intents;
-            // if (results.response.entity === 'Exit') {//exit is an intent in our case, ... how to get intent ?
-            //     session.endDialog("Thanks for using. You can chat again by saying Hi");
-            // }
-            // else {
             
             //DO ERROR CHECKING FOR VERY LARGE LENGHT OF PARAS, TAKE FIRST 500 WORDS OR SUCH
 
             //FIRST CALL A GENERIC JS WHICH GIVES KEYWORDS FROM PARA    //DONE
             
-            //below is the code to print the searched data
             // PASS APPENDED KEYWORDS INTO THE BING SEARCH
-            // bs.getData(session.conversationData.mainEntry,
-            //     function(jsondat){
-            //         session.conversationData.searchedData = jsondat;
-            //         session.send(session.conversationData.searchedData);
-            //     }
-            // );
-            
             // session.conversationData.boolBingSearchAPI = false;
 
             session.conversationData.mainBool = false;
@@ -349,13 +304,8 @@ bot.dialog('/main', [
             switch (results.response.entity) {
                 case "Proper Noun <Entities>":
                     //term to info
-                    //call a JS in the source here
                     //session.send("Proper Noun case detected");
 
-                    // while (!session.conversationData.boolTermsAPI){
-                    //     //waiting for being true
-                    // }
-                    //now begin that dialogue
                     //call the proper noun dialogue with session.begin
                     session.beginDialog('/properNoun');//With what data ?
                     break;
@@ -363,9 +313,6 @@ bot.dialog('/main', [
 
                     //News API, terms  
                     //session.send("Current info case detected");  
-                    // while (!session.conversationData.boolTermsAPI) {
-                    //     //waiting for being true
-                    // }
                     session.beginDialog('/current');                  
                     break;
                 case "People also search for <Recommendations/Similar>":
@@ -373,35 +320,22 @@ bot.dialog('/main', [
                     //bing search recommnedation api 
                     //session.send("People also search for case detected");
                     
-                    // while (!session.conversationData.boolTermsAPI) {
-                    //     //waiting for being true
-                    // }
-                    
                     session.beginDialog('/similar');                                      
                     break;
                 case "Scientific Domain <Academica>":
                     
                     //session.send("Scientific domain case detected");
                     //academic api
-                    // while (!session.conversationData.boolTermsAPI) {
-                    //     //waiting for being true
-                    // }
                     session.beginDialog('/acad');                                      
                     break;
                 case "Term-Definition <Meaning>":
                     //oxford api
                     //session.send("Term defination case detected");
                    
-                    // while (!session.conversationData.boolTermsAPI) {
-                    //     //waiting for being true
-                    // }
                     session.beginDialog('/meaning');                                      
                     break;
                 case "External Search Engine(s) Links":
                     //session.send("External search engine links requested");
-                    // while (!session.conversationData.boolTermsAPI) {
-                    //     //waiting for being true
-                    // }
                     session.beginDialog('/more');
                 case "Help":
                     //do i want the help dialogue to return here ?
@@ -422,50 +356,29 @@ bot.dialog('/main', [
         }
         //next();
     }
-	// ,
-    // function (session, args,next) {
-        // // The menu runs a loop until the user chooses to (quit).
-        // builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
-    // },
-    // function (session, results) {
-        // // The menu runs a loop until the user chooses to (quit).
-        // // session.conversationData.moreBool = results.response;
+	,
+    function (session, args,next) {
+        // The menu runs a loop until the user chooses to (quit).
+        builder.Prompts.confirm(session,"Do you want some more external links to the common search engines? Or type No to exit. ");
+    },
+    function (session, results) {
+        // The menu runs a loop until the user chooses to (quit).
+        // session.conversationData.moreBool = results.response;
         
-        // //CHECK SYNTAX BELOW
-        // if (results.response == true ){
-            // session.replaceDialog('/more');
-        // }
-        // else{
-            // session.replaceDialog('/exit');
-        // }
-    // }    
+        if (results.response == true ){
+            session.replaceDialog('/more');
+        }
+        else{
+            session.replaceDialog('/exit');
+        }
+    }    
 ]);
 
 
 //below dialogue calls the JS and prettifies the output
 bot.dialog('/properNoun', [
     function (session, args, next) {
-            // var msg = new builder.Message(session);
-            // msg.attachmentLayout(builder.AttachmentLayout.carousel)
-            // msg.attachments([
-            //     new builder.HeroCard(session)
-            //         .title("Classic White T-Shirt")
-            //         .subtitle("100% Soft and Luxurious Cotton")
-            //         .text("Price is $25 and carried in sizes (S, M, L, and XL)")
-            //         .images([builder.CardImage.create(session, 'http://petersapparel.parseapp.com/img/whiteshirt.png')])
-            //         .buttons([
-            //             builder.CardAction.imBack(session, "buy classic white t-shirt", "Buy")
-            //         ]),
-            //     new builder.HeroCard(session)
-            //         .title("Classic Gray T-Shirt")
-            //         .subtitle("100% Soft and Luxurious Cotton")
-            //         .text("Price is $25 and carried in sizes (S, M, L, and XL)")
-            //         .images([builder.CardImage.create(session, 'http://petersapparel.parseapp.com/img/grayshirt.png')])
-            //         .buttons([
-            //             builder.CardAction.imBack(session, "buy classic gray t-shirt", "Buy")
-            //         ])
-            // ]);
-            // session.send(msg);
+
         // triggerAction({ matches: /^(show|list)/i });
 
         //generic callback
@@ -565,7 +478,9 @@ bot.dialog('/current', [
 				var solocard = new builder.HeroCard(session)
 						.title(dict['name'])
 						.subtitle(dict['url'])
-						.text(dict['description']);
+                        .text(dict['description']);
+                
+                        //num_cards = 1;
 				delayer(1,function (){//this function will be automatically delayed
 					var msg = new builder.Message(session);
 					msg.attachmentLayout(builder.AttachmentLayout.carousel);
