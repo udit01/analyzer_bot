@@ -27,6 +27,14 @@ the searching for you. Thus saving time to type the whole text for search.
 6. Microsoft Text Analytics Api
 7. Microsoft Linguistics Api
 
+##Usage 
+1. Ping on messenger to "@analyzeriitd". [Currently not working ]
+2. Or locally test.x
+1. Install the bot network emulatory.
+1. Clone the repository.
+1. Clone the repository.
+
+
 ## Team
  1. Udit Jain
  2. Soumya Sharma

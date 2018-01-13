@@ -451,7 +451,7 @@ bot.dialog('/properNoun', [
 
 bot.dialog('/current', [
     function (session, args, next) {
-        session.send('In current news dialogue.');
+        // session.send('In current news dialogue.');
         var lastQueryNoun = session.conversationData.terms[session.conversationData.terms.length -1];
         var listCar=[] ;
 		var numW = 0;
@@ -472,7 +472,8 @@ bot.dialog('/current', [
 						.text(dict['description']));
 						
 				if(oquery == lastQueryNoun){
-					delayer(numW,function (){//this function will be automatically delayed
+                    console.log("In current dialogue numW: "+numW);
+					delayer(numW/5,function (){//this function will be automatically delayed
                         var msg = new builder.Message(session);
                         msg.attachmentLayout(builder.AttachmentLayout.carousel);
                         msg.attachments(listCar);
@@ -482,7 +483,7 @@ bot.dialog('/current', [
                 }
             }
             else {
-                //session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
+                // session.send("The key word was: " + oquery + " .\n\n Related information was not found on this keyword by BingNewsAPI. ");
             }
         }
 

@@ -33,29 +33,35 @@ let getNewsData=function(inp,func1){
 
             try{
                 var relatedNewsSearchArr = reqJson["value"];
+                //what if it doesn't return anything?
+                // console.log("Line 37 -----------"+inp);
+                
                 var numResults = relatedNewsSearchArr.length;
-                console.log(numResults);
+                
                 //var relatedNewsSearchMessage = '';
                 var newSearchJSON = {};
                 newSearchJSON["results"] =[];
                 //newSearchJSON["results"]["name"] =[];
                 // console.log('was executed');
-                for(var i=0;i<numResults && i<=maxresults;i++){
+                var elem = {};
+                for(var i=0;(i<numResults && i<=maxresults);i++){
                     // console.log(i);
+                    
+                    elem = {};
+
+                    elem["name"] = relatedNewsSearchArr[i]["name"];
+                    elem["url"] = relatedNewsSearchArr[i]["url"];
+                    elem["description"] = relatedNewsSearchArr[i]["description"];
+
                     try{
                         //relatedNewsSearchMessage += relatedNewsSearchArr[i]["name"]+" " +relatedNewsSearchArr[i]["url"]+"\n\n"+relatedNewsSearchArr[i]["description"]+"\n\n"+"Provider: "+relatedNewsSearchArr[i]["provider"][0]["name"]+ "\n\n"+"---------------------"+ "\n\n";
-                        newSearchJSON["results"][i] = {};
-                        newSearchJSON["results"][i]["name"] = relatedNewsSearchArr[i]["name"];
-                        newSearchJSON["results"][i]["url"] = relatedNewsSearchArr[i]["url"];
-                        newSearchJSON["results"][i]["description"] = relatedNewsSearchArr[i]["description"];
-                        newSearchJSON["results"][i]["provider"] = relatedNewsSearchArr[i]["provider"][0]["name"];
+                        elem["provider"] = relatedNewsSearchArr[i]["provider"][0]["name"];
+                        
                     }catch(e){
+                        //do nothing ?
                         //relatedNewsSearchMessage += relatedNewsSearchArr[i]["name"]+" " +relatedNewsSearchArr[i]["url"]+"\n\n"+relatedNewsSearchArr[i]["description"]+"\n\n";
-                        newSearchJSON["results"][i] = {};
-                        newSearchJSON["results"][i]["name"] = relatedNewsSearchArr[i]["name"];
-                        newSearchJSON["results"][i]["url"] = relatedNewsSearchArr[i]["url"];
-                        newSearchJSON["results"][i]["description"] = relatedNewsSearchArr[i]["description"];
                     }
+                    newSearchJSON["results"].push(elem);
                 }
                 // console.log("relatedresults being displayed");
             }catch(e){
@@ -63,6 +69,8 @@ let getNewsData=function(inp,func1){
                 stringCode = "Couldn't find relevant news";
 
             }
+            // console.log("Line 72 ---for this input it's done:" + inp);
+            console.log("----- Line 73:input : "+inp+"& stringCode : "+stringCode);
             func1(newSearchJSON,inp,stringCode);
             
         });
