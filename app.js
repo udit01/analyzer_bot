@@ -100,21 +100,21 @@ var bns = require('./src/bingNewsSearch');
 var timeOut = 1000;
 
 // Custom functions -----------------------------------------
-function delayer(multiplier,callbackGeneric){//and 1 global parameter timeout
-    function sleepC(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+// function delayer(multiplier,callbackGeneric){//and 1 global parameter timeout
+//     function sleepC(ms) {
+//         return new Promise(resolve => setTimeout(resolve, ms));
+//     }
 
-    async function demo() {
-        // console.log('Taking a break...');
-        await sleepC(multiplier * timeOut);
-        callbackGeneric();
+//     async function demo() {
+//         // console.log('Taking a break...');
+//         await sleepC(multiplier * timeOut);
+//         callbackGeneric();
         
-        // console.log('Ten second later');
-    }
+//         // console.log('Ten second later');
+//     }
 
-    demo();
-}
+//     demo();
+// }
 
 // .matches('Greeting', (session) => {
 //     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
@@ -258,7 +258,7 @@ bot.dialog('/main', [
     function (session, args, next) {
         //check for the user-data completeness here
         // save the data sent by user to jump to this intent somewhere!
-        console.log("entered in main");
+        // console.log("entered in main");
         
         session.conversationData.mainEntry = session.message.text ;  //starting para of the user
         
@@ -419,12 +419,12 @@ bot.dialog('/properNoun', [
 						);
 						
 				if(oquery == lastQueryNoun){
-					delayer(numW,function (){//this function will be automatically delayed
+					// delayer(numW,function (){//this function will be automatically delayed
                         var msg = new builder.Message(session);
                         msg.attachmentLayout(builder.AttachmentLayout.carousel);
                         msg.attachments(listCar);
                         session.send(msg);
-                    });					
+                    // });					
 
                 }
             }
@@ -473,12 +473,12 @@ bot.dialog('/current', [
 						
 				if(oquery == lastQueryNoun){
                     console.log("In current dialogue numW: "+numW);
-					delayer(numW/5,function (){//this function will be automatically delayed
+					// delayer(numW/5,function (){//this function will be automatically delayed
                         var msg = new builder.Message(session);
                         msg.attachmentLayout(builder.AttachmentLayout.carousel);
                         msg.attachments(listCar);
                         session.send(msg);
-                    });					
+                    // });					
 
                 }
             }
@@ -497,12 +497,12 @@ bot.dialog('/current', [
                         .text(dict['description']);
                 
                         //num_cards = 1;
-				delayer(1,function (){//this function will be automatically delayed
+				// delayer(1,function (){//this function will be automatically delayed
 					var msg = new builder.Message(session);
 					msg.attachmentLayout(builder.AttachmentLayout.carousel);
 					msg.attachments(listCar);
 					session.send(msg);
-				});
+				// });
             }
             else {
                 //session.send("The original query was: " + oquery + " .\n\n Related information was not found on the whole text by BingNewsAPI.\n\nNow searching for indivisual key words. ");
@@ -625,12 +625,12 @@ bot.dialog('/acad', [
 					}
 							
 					if(oquery == lastQuery && dict['abst']!=undefined){
-						delayer(numW/5,function (){//this function will be automatically delayed
+						// delayer(numW/5,function (){//this function will be automatically delayed
 							var msg = new builder.Message(session);
 							msg.attachmentLayout(builder.AttachmentLayout.carousel);
 							msg.attachments(listCar);
 							session.send(msg);
-						});					
+						// });					
 
 					}
 				}

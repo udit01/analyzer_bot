@@ -30,9 +30,11 @@ the searching for you. Thus saving time to type the whole text for search.
 ##Usage 
 1. Ping on messenger to "@analyzeriitd". [Currently not working ]
 2. Or locally test.x
-1. Install the bot network emulatory.
-1. Clone the repository.
-1. Clone the repository.
+3. Install the bot network emulator.
+4. Clone the repository.
+5. run "npm install".
+6. run "node app.js"
+7. Say Hi from bot network emulator
 
 
 ## Team
